@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction, Router } from 'express'
-import { body, validationResult } from 'express-validator'
+import { body, param, validationResult } from 'express-validator'
 import AppDataSource from '../datasource'
 import User from '../entities/entity.user'
 import BadRequestException from '../exceptions/exception.badrequest'
@@ -7,6 +7,7 @@ import NotFoundException from '../exceptions/exception.notfound'
 import tryCatchWrapper from '../utils/util.trycatchwrapper'
 import Controller from './controller.interface'
 import authenticateJWT from '../middleware/middleware.verifyjwt'
+import unprotectedRouteLoadUser from '../middleware/middleware.loaduserdetails'
 
 const userRepository = AppDataSource.getRepository(User)
 
@@ -19,6 +20,13 @@ class UserController implements Controller {
   }
 
   private setupRoutes (): void {
+    this.router.get(
+      `${this.path}/profile/:id`,
+      param('id', 'user id must be a number').isNumeric(),
+      unprotectedRouteLoadUser,
+      tryCatchWrapper(this.GetProfileInfoHandler)
+    )
+
     this.router.patch(
       `${this.path}/profile`,
       body('firstName')
@@ -63,6 +71,27 @@ class UserController implements Controller {
       authenticateJWT,
       tryCatchWrapper(this.NullifyFieldHandler)
     )
+  }
+
+  private async GetProfileInfoHandler (req: Request, res: Response, next: NextFunction): Promise<void> {
+    const errors = validationResult(req)
+    if (!errors.isEmpty()) {
+      return next(new BadRequestException(errors.array()[0].msg))
+    }
+    const { id } = req.params
+    const user = await userRepository.findOneBy({ id: parseInt(id) })
+    if (user == null) {
+      return next(new NotFoundException('user', 'id', id))
+    }
+    const emailOfAuthenticatedUser = res.locals.user?.email as string
+    const userDetails = { ...user } as any
+    delete userDetails.id
+    delete userDetails.password_hash
+    if (emailOfAuthenticatedUser !== user.email_address) {
+      delete userDetails.last_name
+      delete userDetails.has_verified_email
+    }
+    res.json({ user: userDetails })
   }
 
   private async EditProfileHandler (req: Request, res: Response, next: NextFunction): Promise<void> {
