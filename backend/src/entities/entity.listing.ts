@@ -2,6 +2,7 @@ import { Entity, PrimaryGeneratedColumn, Column, OneToOne, ManyToOne, OneToMany 
 import Amenity from './entity.amenity'
 import Room from './entity.room'
 import User from './entity.user'
+import ListingPhoto from './entity.listingphoto'
 
 type RegionType = 'asia' | 'africa' | 'north america' | 'south america' | 'europe' | 'australia'
 const regions = ['asia', 'africa', 'north america', 'south america', 'europe', 'australia']
@@ -43,6 +44,9 @@ class Listing {
 
   @OneToMany(() => Room, (room) => room.listing)
     rooms: Room[]
+
+  @OneToMany(() => ListingPhoto, (listingPhoto) => listingPhoto.listing)
+    photos: ListingPhoto[]
 
   @Column('varchar', { length: 100 })
     name: string
