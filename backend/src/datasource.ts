@@ -6,6 +6,8 @@ import User from './entities/entity.user'
 import Amenity from './entities/entity.amenity'
 import Listing from './entities/entity.listing'
 import Room from './entities/entity.room'
+import Photo from './entities/entity.photo'
+import RoomPhoto from './entities/entity.roomphoto'
 
 dotenv.config()
 
@@ -23,7 +25,7 @@ const AppDataSource = new DataSource({
   password: DB_PASSWORD,
   database: DB_NAME,
   migrations: [path.join(__dirname, '/migrations/*.ts')],
-  entities: [User, Amenity, Listing, Room],
+  entities: [User, Amenity, Listing, Room, Photo, RoomPhoto],
   synchronize: false
 })
 

@@ -1,6 +1,7 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne } from 'typeorm'
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, OneToOne } from 'typeorm'
 import RoomInfo from '../types/type.roominfo'
 import Listing from './entity.listing'
+import RoomPhoto from './entity.roomphoto'
 
 @Entity('rooms')
 class Room {
@@ -9,6 +10,9 @@ class Room {
 
   @ManyToOne(() => Listing, (listing) => listing.rooms, { onDelete: 'CASCADE' })
     listing: Listing
+
+  @OneToOne(() => RoomPhoto, (roomPhoto) => roomPhoto.room)
+    photo: RoomPhoto
 
   @Column('varchar', { length: 50 })
     name: string
