@@ -1,5 +1,6 @@
-import { Entity, PrimaryGeneratedColumn, Column, OneToOne } from 'typeorm'
+import { Entity, PrimaryGeneratedColumn, Column, OneToOne, ManyToOne } from 'typeorm'
 import Amenity from './entity.amenity'
+import User from './entity.user'
 
 type RegionType = 'asia' | 'africa' | 'north america' | 'south america' | 'europe' | 'australia'
 const regions = ['asia', 'africa', 'north america', 'south america', 'europe', 'australia']
@@ -35,6 +36,9 @@ class Listing {
 
   @OneToOne(() => Amenity, (amenity) => amenity.owned_by)
     amenities: Amenity
+
+  @ManyToOne(() => User, (user) => user.listings, { onDelete: 'CASCADE' })
+    owner: User
 
   @Column('varchar', { length: 100 })
     name: string
