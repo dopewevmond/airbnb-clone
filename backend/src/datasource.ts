@@ -3,6 +3,8 @@ import { DataSource } from 'typeorm'
 import * as path from 'path'
 import * as dotenv from 'dotenv'
 import User from './entities/entity.user'
+import Amenity from './entities/entity.amenity'
+import Listing from './entities/entity.listing'
 
 dotenv.config()
 
@@ -20,7 +22,7 @@ const AppDataSource = new DataSource({
   password: DB_PASSWORD,
   database: DB_NAME,
   migrations: [path.join(__dirname, '/migrations/*.ts')],
-  entities: [User],
+  entities: [User, Amenity, Listing],
   synchronize: false
 })
 
