@@ -6,7 +6,7 @@ class Amenity {
   @PrimaryColumn()
     ownedbyId: number
 
-  @OneToOne(() => Listing, (listing) => listing.amenities)
+  @OneToOne(() => Listing, (listing) => listing.amenities, { onDelete: 'CASCADE' })
   @JoinColumn()
     owned_by: Listing
 
