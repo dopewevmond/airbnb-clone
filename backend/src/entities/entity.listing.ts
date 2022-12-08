@@ -5,7 +5,7 @@ import User from './entity.user'
 import ListingPhoto from './entity.listingphoto'
 
 type RegionType = 'asia' | 'africa' | 'north america' | 'south america' | 'europe' | 'australia'
-const regions = ['asia', 'africa', 'north america', 'south america', 'europe', 'australia']
+export const regions = ['asia', 'africa', 'north america', 'south america', 'europe', 'australia']
 type ListingType =
   | 'house'
   | 'flat/apartment'
@@ -18,7 +18,7 @@ type ListingType =
   | 'container'
   | 'dome'
 
-const listings = [
+export const listings = [
   'house',
   'flat/apartment',
   'tent',
@@ -51,7 +51,7 @@ class Listing {
   @Column('varchar', { length: 100 })
     name: string
 
-  @Column('varchar', { length: 100 })
+  @Column('varchar', { length: 500 })
     description: string
 
   @Column({ type: 'timestamptz' })
@@ -82,7 +82,7 @@ class Listing {
     listing_type: ListingType
 
   @Column({ type: 'boolean', default: true })
-    fully_private_listing: string
+    fully_private_listing: boolean
 
   @Column('int')
     min_nights_stay: number
