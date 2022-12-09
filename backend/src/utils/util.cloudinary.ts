@@ -18,7 +18,7 @@ v2.config({
  * be used to access the image and delete an image by its id respectively
  */
 // eslint-disable-next-line @typescript-eslint/promise-function-async
-function uploadImage (imageBuffer: ArrayBuffer): Promise<unknown> {
+export function uploadImage (imageBuffer: ArrayBuffer): Promise<unknown> {
   return new Promise((resolve, reject) => {
     v2.uploader.upload_stream((err, image) => {
       if (err != null) {
@@ -49,5 +49,3 @@ export function deleteImage (publicImageId: string): any {
       return new HttpException(500, err)
     })
 }
-
-export default uploadImage
