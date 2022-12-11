@@ -1,8 +1,8 @@
 import styled from "styled-components";
 import STYLES from "../Styles";
 
-const FOOTER_BREAKPOINT_LG = "1128px";
-const FOOTER_BREAKPOINT_MD = "740px";
+export const FOOTER_BREAKPOINT_LG = "1128px";
+export const FOOTER_BREAKPOINT_MD = "740px";
 
 const StyledFooter = styled.footer`
   display: none;

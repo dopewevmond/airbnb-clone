@@ -1,6 +1,14 @@
 import { useState } from "react";
 import styled from "styled-components";
+import STYLES from "../Styles";
+import { FOOTER_BREAKPOINT_MD } from './Footer'
 
+const Nav = styled.nav`
+  display: none;
+  @media (min-width: ${FOOTER_BREAKPOINT_MD}) {
+    display: block;
+  }
+`
 const RowFlexContainerSpacedBetween = styled.div`
   display: flex;
   flex-flow: row wrap;
@@ -42,10 +50,13 @@ const Dropdown = styled.button`
   border-radius: 12px;
   display: flex;
   flex-direction: row wrap;
-  align-items: center;
+  align-items: center;  
   > * {
     margin-left: 5px;
   }
+`;
+const HrLightColor = styled.div`
+  border-bottom: 1px solid ${STYLES.borderColor};
 `;
 type DropdownContentProps = {
   isDropdownOpen: boolean;
@@ -54,13 +65,35 @@ const DropdownContent = styled.div<DropdownContentProps>`
   display: ${(props) => (props.isDropdownOpen ? "block" : "none")};
   position: absolute;
   right: 0;
-  top: 2.5em;
+  top: 1.5em;
+  z-index: 10;
+  ul {
+    list-style-type: none;
+    background-color: white;
+    border: 1px solid ${STYLES.borderColor};
+    border-radius: ${STYLES.smallBorderRadius + 'em'};
+    padding: 0;
+    li {
+      width: 100%;
+      text-align: left;
+      font-size: ${STYLES.smallFontSize * 1.1 + 'em'};
+      a {
+        display: block;
+        padding: ${STYLES.elementPadding * 1.1 + 'em'} ${STYLES.elementPadding * 2 + 'em'};
+        width: 100%;
+        text-decoration: none;
+        &:hover {
+          background-color: #eaeaea71;
+        }
+      }
+    }
+  }
 `;
 
 const Navbar = () => {
   const [isDropdownOpen, toggleDropdown] = useState<boolean>(false);
   return (
-    <nav style={{ borderBottom: "1px solid #d1d9da" }}>
+    <Nav style={{ borderBottom: "1px solid #d1d9da" }}>
       <div className="container">
         <RowFlexContainerSpacedBetween>
           <div className="logo-container">
@@ -121,12 +154,19 @@ const Navbar = () => {
 
             {/* hidden element will be here */}
             <DropdownContent isDropdownOpen={isDropdownOpen}>
-              this is the content
+              <ul>
+                <li className="font-bold"><a href="/login">Sign up</a></li>
+                <li><a href="/login">Log in</a></li>
+                <li><HrLightColor /></li>
+                <li><a href="/">Airbnb your home</a></li>
+                <li><a href="/">Host an experience</a></li>
+                <li><a href="/">Help</a></li>
+              </ul>
             </DropdownContent>
           </ColFlexContainer>
         </RowFlexContainerSpacedBetween>
       </div>
-    </nav>
+    </Nav>
   );
 };
 
