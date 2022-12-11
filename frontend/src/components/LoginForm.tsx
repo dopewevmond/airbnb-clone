@@ -1,7 +1,6 @@
 import styled from "styled-components";
 import STYLES from "../Styles";
-import StyledInput from "./Input";
-import StyledButton from "./Button";
+import { useState, FormEvent } from "react";
 
 const LoginFormContainer = styled.div`
   width: 90%;
@@ -10,37 +9,113 @@ const LoginFormContainer = styled.div`
   max-width: ${STYLES.maxWidthMediumContainer + "em"};
   border: 1px solid ${STYLES.borderColor};
   border-radius: 20px;
-`;
-const HasBorderBottom = styled.div`
-  border-bottom: 1px solid ${STYLES.borderBottomColor};
-  padding: ${STYLES.elementSpacing * 0.5 + "em"};
-`;
-const FormContent = styled.div`
-  padding: ${STYLES.elementSpacing + "em"};
-`;
-const VerticallyPadded = styled.div`
-  padding: ${STYLES.elementPadding + "em"} 0;
+  .border-bottom {
+    border-bottom: 1px solid ${STYLES.borderBottomColor};
+    padding: ${STYLES.elementSpacing * 0.5 + "em"};
+  }
+  .form-content {
+    padding: ${STYLES.elementSpacing + "em"};
+  }
+  .vertically-padded {
+    padding: ${STYLES.elementPadding + "em"} 0;
+  }
+  .input-container {
+    position: relative;
+    width: 100%;
+  }
+  .input-label {
+    position: absolute;
+    pointer-events: none;
+    left: ${STYLES.elementSpacing * 0.55 + "em"};
+    top: 18px;
+    transition: 0.2s ease all;
+    opacity: 0.3;
+  }
+  .show-hide-password {
+    position: absolute;
+    right: 0.7em;
+    top: 1.75em;
+    font-size: 0.7em;
+    text-decoration: underline;
+    cursor: pointer;
+  }
+  .input-field {
+    border: none;
+    outline: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    font-size: inherit;
+    font-weight: inherit;
+    line-height: inherit;
+    width: 100%;
+    border: 1.5px solid ${STYLES.borderColor};
+    border-radius: ${STYLES.smallBorderRadius + "em"};
+    padding: ${STYLES.elementSpacing * 0.5 + "em"};
+    &:focus ~ .floating-label,
+    &:not(:placeholder-shown) ~ .floating-label {
+      top: 5px;
+      left: ${STYLES.elementSpacing * 0.7 + "em"};
+      font-size: 0.8em;
+      opacity: 0.6;
+    }
+  }
+  .styled-button {
+    background: ${STYLES.mainBackgroundColor};
+    color: white;
+    border: none;
+    border-radius: ${STYLES.smallBorderRadius + "em"};
+    padding-top: ${STYLES.elementSpacing * 0.5 + "em"};
+    padding-bottom: ${STYLES.elementSpacing * 0.5 + "em"};
+    font: inherit;
+    cursor: pointer;
+    outline: inherit;
+    width: 100%;
+    -webkit-transition: 0.2s ease all;
+    transition: 0.2s ease all;
+    &:hover {
+      background: ${STYLES.hoverBackgroundColor};
+    }
+  }
 `;
 
 const LoginForm = () => {
+  const [isInputHidden, toggleInputVisibility] = useState(true);
+
+  function handleSubmit(e: FormEvent): void {
+    e.preventDefault();
+    console.log(e.target);
+  }
+
   return (
     <LoginFormContainer>
-      <HasBorderBottom>
+      <div className="border-bottom">
         <p className="font-bold text-center">Welcome back, John</p>
-      </HasBorderBottom>
-      <FormContent>
-        <form noValidate>
-          <StyledInput placeholder="Password" hidden={true} />
-          <VerticallyPadded className="w-100">
-            <StyledButton
-              background={STYLES.mainBackgroundColor}
-              color="#fff"
-              value="Log in"
-              hoverBackground={STYLES.hoverBackgroundColor}
+      </div>
+      <div className="form-content">
+        <form noValidate onSubmit={handleSubmit}>
+          <div className="input-container">
+            <input
+              className="input-field"
+              placeholder="Password"
+              type={isInputHidden ? "password" : "text"}
             />
-          </VerticallyPadded>
+            <span className="input-label floating-label">Password</span>
+            <span
+              className="show-hide-password"
+              onClick={() => toggleInputVisibility(!isInputHidden)}
+            >
+              {isInputHidden ? <>show</> : <>hide</>}
+            </span>
+          </div>
+
+          <div className="vertically-padded w-100">
+            <button className="styled-button" type="submit">
+              Log In
+            </button>
+          </div>
         </form>
-      </FormContent>
+      </div>
     </LoginFormContainer>
   );
 };
