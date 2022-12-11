@@ -5,7 +5,7 @@ import StyledButton from "./Button";
 
 const LoginFormContainer = styled.div`
   width: 90%;
-  margin: ${STYLES.elementSpacing + "em"} auto
+  margin: ${STYLES.elementSpacing * 2 + "em"} auto
     ${STYLES.elementSpacing + "em"};
   max-width: ${STYLES.maxWidthMediumContainer + "em"};
   border: 1px solid ${STYLES.borderColor};
@@ -29,7 +29,7 @@ const LoginForm = () => {
       </HasBorderBottom>
       <FormContent>
         <VerticallyPadded>
-          <h2>Welcome to Airbnb</h2>
+          <h4>Welcome to Airbnb</h4>
         </VerticallyPadded>
         <form noValidate>
           <StyledInput placeholder="Email" />

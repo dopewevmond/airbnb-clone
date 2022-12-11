@@ -7,6 +7,7 @@ const STYLES = {
   smallBorderRadius: 0.4,
   elementPadding: 1,
   hoverBackgroundColor: '#ff385c',
-  mainBackgroundColor: '#e61e4d'
+  mainBackgroundColor: '#e61e4d',
+  smallFontSize: 0.8
 }
 export default STYLES

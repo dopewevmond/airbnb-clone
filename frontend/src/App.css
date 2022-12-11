@@ -23,6 +23,9 @@ h1, h2, h3, h4, h5, h6, p {
 .w-100 {
   width: 100%;
 }
+a {
+  color: inherit;
+}
 @media only screen and (min-width: 768px) {
   .container {
     width: 95%;
