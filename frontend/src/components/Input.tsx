@@ -8,7 +8,7 @@ const InputContainer = styled.div`
 const InputLabel = styled.span`
   position: absolute;
   pointer-events: none;
-  left: ${STYLES.elementSpacing * 0.55 + 'em'};
+  left: ${STYLES.elementSpacing * 0.55 + "em"};
   top: 18px;
   transition: 0.2s ease all;
   opacity: 0.3;
@@ -27,9 +27,10 @@ const InputField = styled.input`
   border-radius: ${STYLES.smallBorderRadius + "em"};
   padding: ${STYLES.elementSpacing * 0.5 + "em"};
 
-  &:focus ~ .floating-label, &:not(:placeholder-shown) ~ .floating-label {
+  &:focus ~ .floating-label,
+  &:not(:placeholder-shown) ~ .floating-label {
     top: 5px;
-    left: ${STYLES.elementSpacing * 0.7 + 'em'};
+    left: ${STYLES.elementSpacing * 0.7 + "em"};
     font-size: 0.8em;
     opacity: 0.6;
   }
