@@ -1,8 +1,6 @@
 const STYLES = {
-  elementMarginTopBottom: 2,
-  sectionMarginTopBottom: 6,
-  sectionPadddingTopBottom: 2,
-  sectionPadding: 1,
+  elementSpacing: 2,
+  sectionSpacing: 6,
   borderColor: '#B0B0B0',
   borderBottomColor: '#EBEBEB',
   maxWidthMediumContainer: 35,

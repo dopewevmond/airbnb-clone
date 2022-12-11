@@ -11,8 +11,8 @@ const Button = styled.button<ButtonProps>`
   color: ${(props) => props.btnColor};
   border: none;
   border-radius: ${STYLES.smallBorderRadius + "em"};
-  padding-top: ${STYLES.sectionPadding + "em"};
-  padding-bottom: ${STYLES.sectionPadding + "em"};
+  padding-top: ${STYLES.elementSpacing * 0.5 + "em"};
+  padding-bottom: ${STYLES.elementSpacing * 0.5 + "em"};
   font: inherit;
   cursor: pointer;
   outline: inherit;

@@ -5,18 +5,18 @@ import StyledButton from "./Button";
 
 const LoginFormContainer = styled.div`
   width: 90%;
-  margin: ${STYLES.sectionMarginTopBottom + "em"} auto
-    ${STYLES.sectionMarginTopBottom + "em"};
+  margin: ${STYLES.elementSpacing + "em"} auto
+    ${STYLES.elementSpacing + "em"};
   max-width: ${STYLES.maxWidthMediumContainer + "em"};
   border: 1px solid ${STYLES.borderColor};
   border-radius: 20px;
 `;
 const HasBorderBottom = styled.div`
   border-bottom: 1px solid ${STYLES.borderBottomColor};
-  padding: ${STYLES.sectionPadding + "em"};
+  padding: ${STYLES.elementSpacing * 0.5 + "em"};
 `;
 const FormContent = styled.div`
-  padding: ${STYLES.sectionPadding * 2 + "em"};
+  padding: ${STYLES.elementSpacing + "em"};
 `;
 const VerticallyPadded = styled.div`
   padding: ${STYLES.elementPadding + "em"} 0;

@@ -1,36 +1,52 @@
 import styled from "styled-components";
+import STYLES from "../Styles";
 
+const FOOTER_BREAKPOINT_LG = "1128px";
+const FOOTER_BREAKPOINT_MD = "740px";
+
+const StyledFooter = styled.footer`
+  display: none;
+  @media (min-width: ${FOOTER_BREAKPOINT_MD}) {
+    display: block;
+    background-color: #f7f7f7;
+    border-top: 1px solid #dddddd;
+    padding: ${STYLES.elementSpacing * 2 + "em"} 0;
+  }
+`;
 const Row = styled.div`
   display: none;
-  @media (min-width: 740px) {
+  @media (min-width: ${FOOTER_BREAKPOINT_MD}) {
     display: flex;
     flex-flow: column wrap;
+    justify-items: flex-start;
   }
-  @media (min-width: 1128px) {
+  @media (min-width: ${FOOTER_BREAKPOINT_LG}) {
     flex-direction: row;
     gap: 4%;
     > * {
-      flex-grow: 1;
       flex-basis: 22%;
     }
   }
 `;
 const UnstyledList = styled.ul`
-  @media (min-width: 740px) {
+  @media (min-width: ${FOOTER_BREAKPOINT_MD}) {
     margin: 0;
     padding: 0;
     list-style-type: none;
     display: flex;
     flex-flow: row wrap;
-    gap: 3.33%;
+    gap: 0.6em 3.33%;
     > * {
       flex-basis: 30%;
     }
+    button {
+      color: #222222;
+    }
   }
-  @media (min-width: 1128px) {
+  @media (min-width: ${FOOTER_BREAKPOINT_LG}) {
     flex-direction: column;
     justify-content: flex-start;
-    gap: unset;
+    gap: 1em;
     > * {
       flex-basis: 100%;
     }
@@ -43,16 +59,30 @@ const ButtonsAsLinks = styled.button`
   color: inherit;
   text-align: left;
   cursor: pointer;
+  &:hover {
+    text-decoration: underline;
+  }
 `;
 const FooterSectionHeader = styled.p`
   font-weight: bold;
+  font-size: 0.9em;
   margin-top: 0.4em;
   margin-bottom: 0.4em;
+`;
+const HideOnLargeDevices = styled.div`
+  display: block;
+  @media (min-width: ${FOOTER_BREAKPOINT_LG}) {
+    display: none;
+  }
+`;
+const HrLightColor = styled.div`
+  border-bottom: 1px solid ${STYLES.borderColor};
+  margin: ${STYLES.elementSpacing + 'em'} 0;
 `;
 
 const Footer = () => {
   return (
-    <footer style={{ backgroundColor: "#d7d7d7" }}>
+    <StyledFooter>
       <div className="container">
         <Row>
           <div>
@@ -79,6 +109,9 @@ const Footer = () => {
                 <ButtonsAsLinks>Report a neighborhood concern</ButtonsAsLinks>
               </li>
             </UnstyledList>
+            <HideOnLargeDevices>
+              <HrLightColor />
+            </HideOnLargeDevices>
           </div>
           <div>
             <FooterSectionHeader>Community</FooterSectionHeader>
@@ -92,6 +125,9 @@ const Footer = () => {
                 <ButtonsAsLinks>Combating Discrimination</ButtonsAsLinks>
               </li>
             </UnstyledList>
+            <HideOnLargeDevices>
+              <HrLightColor />
+            </HideOnLargeDevices>
           </div>
           <div>
             <FooterSectionHeader>Hosting</FooterSectionHeader>
@@ -112,6 +148,9 @@ const Footer = () => {
                 <ButtonsAsLinks>How to host responsibly</ButtonsAsLinks>
               </li>
             </UnstyledList>
+            <HideOnLargeDevices>
+              <HrLightColor />
+            </HideOnLargeDevices>
           </div>
           <div>
             <FooterSectionHeader>Airbnb</FooterSectionHeader>
@@ -135,12 +174,13 @@ const Footer = () => {
                 <ButtonsAsLinks>Gift cards</ButtonsAsLinks>
               </li>
             </UnstyledList>
+            <HideOnLargeDevices>
+              <HrLightColor />
+            </HideOnLargeDevices>
           </div>
         </Row>
-        <hr />
-
       </div>
-    </footer>
+    </StyledFooter>
   );
 };
 
