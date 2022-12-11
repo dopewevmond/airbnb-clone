@@ -1,7 +1,12 @@
 import styled from "styled-components";
 import STYLES from "../Styles";
+import { FC, useState, ChangeEvent, FormEvent } from "react";
 
-const AuthFormContainer = styled.div`
+type AuthFormProps = {
+  inputTouched: boolean;
+  emailValidated: boolean;
+};
+const AuthFormContainer = styled.div<AuthFormProps>`
   width: 90%;
   margin: ${STYLES.elementSpacing * 2 + "em"} auto
     ${STYLES.elementSpacing + "em"};
@@ -33,7 +38,7 @@ const AuthFormContainer = styled.div`
     font-weight: inherit;
     line-height: inherit;
     width: 100%;
-    border: 1.5px solid ${STYLES.borderColor};
+    border: 1.5px solid ${(props) => (props.inputTouched && !props.emailValidated) ? STYLES.mainBackgroundColor : STYLES.borderColor};
     border-radius: ${STYLES.smallBorderRadius + "em"};
     padding: ${STYLES.elementSpacing * 0.5 + "em"};
     &:focus ~ .input-label,
@@ -42,6 +47,7 @@ const AuthFormContainer = styled.div`
       left: ${STYLES.elementSpacing * 0.7 + "em"};
       font-size: 0.8em;
       opacity: 0.6;
+      font-weight: bold;
     }
   }
   .input-label {
@@ -51,6 +57,7 @@ const AuthFormContainer = styled.div`
     top: 18px;
     transition: 0.2s ease all;
     opacity: 0.3;
+    color: ${(props) => (props.inputTouched && !props.emailValidated) ? 'red' : STYLES.borderColor};
   }
   .styled-button {
     background: ${STYLES.mainBackgroundColor};
@@ -70,9 +77,31 @@ const AuthFormContainer = styled.div`
     }
   }
 `;
-const MainAuthForm = () => {
+
+const MainAuthForm: FC = () => {
+  const [value, setValue] = useState("");
+  const [isValidEmail, setValidEmail] = useState(false);
+  const [touched, setTouched] = useState(false);
+
+  function handleChange(e: ChangeEvent<HTMLInputElement>) {
+    if (!touched) {
+      setTouched(!touched);
+    }
+    setValue(e.target.value);
+    setValidEmail(
+      /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(
+        value
+      )
+    );
+  }
+
+  function handleSubmit(e: FormEvent) {
+    e.preventDefault()
+    console.log({ value })
+  }
+
   return (
-    <AuthFormContainer>
+    <AuthFormContainer inputTouched={touched} emailValidated={isValidEmail}>
       <div className="border-bottom">
         <p className="font-bold text-center">Log in or sign up</p>
       </div>
@@ -80,9 +109,17 @@ const MainAuthForm = () => {
         <div className="vertically-padded">
           <h4>Welcome to Airbnb</h4>
         </div>
-        <form noValidate>
+        <form noValidate onSubmit={handleSubmit}>
           <div className="input-container">
-            <input type="text" className="input-field" placeholder="Email" />
+            <input
+              type="text"
+              className="input-field"
+              placeholder="Email"
+              id="email"
+              name="email"
+              value={value}
+              onChange={handleChange}
+            />
             <span className="input-label">Email</span>
           </div>
           <div className="vertically-padded w-100">
