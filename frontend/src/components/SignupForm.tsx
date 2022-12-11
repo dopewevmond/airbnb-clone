@@ -22,20 +22,31 @@ const VerticallyPadded = styled.div`
   padding: ${STYLES.elementPadding + "em"} 0;
 `;
 
-const LoginForm = () => {
+const SignupForm = () => {
   return (
     <LoginFormContainer>
       <HasBorderBottom>
-        <p className="font-bold text-center">Welcome back, John</p>
+        <p className="font-bold text-center">Finish signing up</p>
       </HasBorderBottom>
       <FormContent>
         <form noValidate>
-          <StyledInput placeholder="Password" hidden={true} />
+          <VerticallyPadded>
+            <StyledInput placeholder="First name" />
+          </VerticallyPadded>
+          <VerticallyPadded>
+            <StyledInput placeholder="Last name" />
+          </VerticallyPadded>
+          <VerticallyPadded>
+            <StyledInput placeholder="Email" />
+          </VerticallyPadded>
+          <VerticallyPadded>
+            <StyledInput placeholder="Password" hidden={true} />
+          </VerticallyPadded>
           <VerticallyPadded className="w-100">
             <StyledButton
               background={STYLES.mainBackgroundColor}
               color="#fff"
-              value="Log in"
+              value="Sign up"
               hoverBackground={STYLES.hoverBackgroundColor}
             />
           </VerticallyPadded>
@@ -45,4 +56,4 @@ const LoginForm = () => {
   );
 };
 
-export default LoginForm;
+export default SignupForm;

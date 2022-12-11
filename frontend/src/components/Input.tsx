@@ -1,5 +1,6 @@
 import styled from "styled-components";
 import STYLES from "../Styles";
+import { useState, useEffect } from "react";
 
 const InputContainer = styled.div`
   position: relative;
@@ -12,6 +13,14 @@ const InputLabel = styled.span`
   top: 18px;
   transition: 0.2s ease all;
   opacity: 0.3;
+`;
+const ToggleInputType = styled.span`
+  position: absolute;
+  right: 0.7em;
+  top: 1.75em;
+  font-size: 0.7em;
+  text-decoration: underline;
+  cursor: pointer;
 `;
 const InputField = styled.input`
   border: none;
@@ -37,12 +46,34 @@ const InputField = styled.input`
 `;
 type InputProps = {
   placeholder: string;
+  hidden?: boolean;
 };
-const StyledInput = ({ placeholder }: InputProps) => {
+const StyledInput = ({ placeholder, hidden }: InputProps) => {
+  const [inputType, toggleInputType] = useState("text");
+  useEffect(() => {
+    if (hidden === true) {
+      toggleInputType("password");
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+  function toggleInput() {
+    if (inputType === "text") {
+      toggleInputType("password");
+    } else {
+      toggleInputType("text");
+    }
+  }
   return (
     <InputContainer>
-      <InputField placeholder={placeholder} />
+      <InputField placeholder={placeholder} type={inputType} />
       <InputLabel className="floating-label">{placeholder}</InputLabel>
+      {hidden ? (
+        <ToggleInputType onClick={toggleInput}>
+          {inputType === "text" ? <>hide</> : <>show</>}
+        </ToggleInputType>
+      ) : (
+        <></>
+      )}
     </InputContainer>
   );
 };

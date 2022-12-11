@@ -21,21 +21,23 @@ const FormContent = styled.div`
 const VerticallyPadded = styled.div`
   padding: ${STYLES.elementPadding + "em"} 0;
 `;
-
-const LoginForm = () => {
+const MainAuthForm = () => {
   return (
     <LoginFormContainer>
       <HasBorderBottom>
-        <p className="font-bold text-center">Welcome back, John</p>
+        <p className="font-bold text-center">Log in or sign up</p>
       </HasBorderBottom>
       <FormContent>
+        <VerticallyPadded>
+          <h4>Welcome to Airbnb</h4>
+        </VerticallyPadded>
         <form noValidate>
-          <StyledInput placeholder="Password" hidden={true} />
+          <StyledInput placeholder="Email" />
           <VerticallyPadded className="w-100">
             <StyledButton
               background={STYLES.mainBackgroundColor}
               color="#fff"
-              value="Log in"
+              value="Continue"
               hoverBackground={STYLES.hoverBackgroundColor}
             />
           </VerticallyPadded>
@@ -45,4 +47,4 @@ const LoginForm = () => {
   );
 };
 
-export default LoginForm;
+export default MainAuthForm;
