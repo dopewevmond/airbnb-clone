@@ -1,89 +1,90 @@
 import { useState } from "react";
 import styled from "styled-components";
 import STYLES from "../Styles";
-import { FOOTER_BREAKPOINT_MD } from './Footer'
+import { FOOTER_BREAKPOINT_MD } from "./Footer";
 
-const Nav = styled.nav`
+type DropdownContentProps = {
+  isDropdownOpen: boolean;
+};
+
+const Nav = styled.nav<DropdownContentProps>`
   display: none;
   @media (min-width: ${FOOTER_BREAKPOINT_MD}) {
     display: block;
   }
-`
-const RowFlexContainerSpacedBetween = styled.div`
-  display: flex;
-  flex-flow: row wrap;
-  justify-content: space-between;
-  align-items: center;
-  height: 5.2em;
-`;
-const ColFlexContainer = styled.div`
-  position: relative;
-  display: flex;
-  flex-flow: row wrap;
-  > * {
-    margin-left: 0.7em;
+  .flex-row-spaced-bn {
+    display: flex;
+    flex-flow: row wrap;
+    justify-content: space-between;
+    align-items: center;
+    height: 5.2em;
   }
-`;
-const GlobeButton = styled.button`
-  background: none;
-  border: none;
-  cursor: pointer;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-`;
-const ButtonAsLink = styled.button`
-  background: none;
-  border: none;
-  padding: 0;
-  color: inherit;
-  cursor: pointer;
-  font-weight: bold;
-`;
-const Dropdown = styled.button`
-  background: none;
-  color: inherit;
-  font: inherit;
-  cursor: pointer;
-  outline: inherit;
-  border: 1px solid gray;
-  border-radius: 12px;
-  display: flex;
-  flex-direction: row wrap;
-  align-items: center;  
-  > * {
-    margin-left: 5px;
+  .flex-col-container {
+    position: relative;
+    display: flex;
+    flex-flow: row wrap;
+    > * {
+      margin-left: 0.7em;
+    }
   }
-`;
-const HrLightColor = styled.div`
-  border-bottom: 1px solid ${STYLES.borderColor};
-`;
-type DropdownContentProps = {
-  isDropdownOpen: boolean;
-};
-const DropdownContent = styled.div<DropdownContentProps>`
-  display: ${(props) => (props.isDropdownOpen ? "block" : "none")};
-  position: absolute;
-  right: 0;
-  top: 1.5em;
-  z-index: 10;
-  ul {
-    list-style-type: none;
-    background-color: white;
-    border: 1px solid ${STYLES.borderColor};
-    border-radius: ${STYLES.smallBorderRadius + 'em'};
+  .globe-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  .button-as-link {
+    background: none;
+    border: none;
     padding: 0;
-    li {
-      width: 100%;
-      text-align: left;
-      font-size: ${STYLES.smallFontSize * 1.1 + 'em'};
-      a {
-        display: block;
-        padding: ${STYLES.elementPadding * 1.1 + 'em'} ${STYLES.elementPadding * 2 + 'em'};
+    color: inherit;
+    cursor: pointer;
+    font-weight: bold;
+  }
+  .dropdown {
+    background: none;
+    color: inherit;
+    font: inherit;
+    cursor: pointer;
+    outline: inherit;
+    border: 1px solid gray;
+    border-radius: 12px;
+    display: flex;
+    flex-direction: row wrap;
+    align-items: center;
+    > * {
+      margin-left: 5px;
+    }
+  }
+  .hr-light-color {
+    border-bottom: 1px solid ${STYLES.borderColor};
+  }
+  .drop-down-content {
+    display: ${(props) => (props.isDropdownOpen ? "block" : "none")};
+    position: absolute;
+    right: 0;
+    top: 1.5em;
+    z-index: 10;
+    ul {
+      list-style-type: none;
+      background-color: white;
+      border: 1px solid ${STYLES.borderColor};
+      border-radius: ${STYLES.smallBorderRadius + "em"};
+      padding: 0;
+      li {
         width: 100%;
-        text-decoration: none;
-        &:hover {
-          background-color: #eaeaea71;
+        text-align: left;
+        font-size: ${STYLES.smallFontSize * 1.1 + "em"};
+        a {
+          display: block;
+          padding: ${STYLES.elementPadding * 1.1 + "em"} ${STYLES.elementPadding * 2 + "em"};
+          width: 100%;
+          text-decoration: none;
+          &:hover {
+            background-color: #eaeaea71;
+          }
         }
       }
     }
@@ -93,9 +94,12 @@ const DropdownContent = styled.div<DropdownContentProps>`
 const Navbar = () => {
   const [isDropdownOpen, toggleDropdown] = useState<boolean>(false);
   return (
-    <Nav style={{ borderBottom: "1px solid #d1d9da" }}>
+    <Nav
+      style={{ borderBottom: "1px solid #d1d9da" }}
+      isDropdownOpen={isDropdownOpen}
+    >
       <div className="container">
-        <RowFlexContainerSpacedBetween>
+        <div className="flex-row-spaced-bn">
           <div className="logo-container">
             <svg width="102" height="32" display="block">
               <path
@@ -104,9 +108,9 @@ const Navbar = () => {
               ></path>
             </svg>
           </div>
-          <ColFlexContainer>
-            <ButtonAsLink>Airbnb your home</ButtonAsLink>
-            <GlobeButton>
+          <div className="flex-col-container">
+            <button className="button-as-link">Airbnb your home</button>
+            <button className="globe-btn">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 fill="currentcolor"
@@ -117,8 +121,9 @@ const Navbar = () => {
               >
                 <path d="M8.002.25a7.77 7.77 0 017.748 7.776 7.75 7.75 0 01-7.521 7.72l-.246.004a7.75 7.75 0 01-7.73-7.513L.25 7.992A7.75 7.75 0 018.002.25zm1.949 8.5H6.048c.155 2.897 1.176 5.343 1.886 5.493l.068.007c.68-.002 1.72-2.365 1.932-5.23zm4.255 0h-2.752c-.091 1.96-.53 3.783-1.188 5.076a6.257 6.257 0 003.905-4.829zm-9.661 0h-2.75a6.257 6.257 0 003.934 5.075c-.615-1.208-1.036-2.875-1.162-4.686l-.022-.39zm1.188-6.576l-.115.046a6.257 6.257 0 00-3.823 5.03h2.75c.085-1.83.471-3.54 1.059-4.81zm2.262-.424c-.702.002-1.784 2.512-1.947 5.5h3.904C9.796 4.347 8.774 1.907 8.06 1.756l-.065-.007zm2.28.432l.023.05c.643 1.288 1.069 3.084 1.157 5.018h2.748a6.275 6.275 0 00-3.929-5.068z"></path>
               </svg>
-            </GlobeButton>
-            <Dropdown
+            </button>
+            <button
+              className="dropdown"
               onClick={() => {
                 toggleDropdown(!isDropdownOpen);
               }}
@@ -150,21 +155,33 @@ const Navbar = () => {
                   <path d="M16 .7C7.563.7.7 7.563.7 16S7.563 31.3 16 31.3 31.3 24.437 31.3 16 24.437.7 16 .7zm0 28c-4.021 0-7.605-1.884-9.933-4.81a12.425 12.425 0 016.451-4.4A6.507 6.507 0 019.5 14c0-3.584 2.916-6.5 6.5-6.5s6.5 2.916 6.5 6.5a6.513 6.513 0 01-3.019 5.491 12.42 12.42 0 016.452 4.4C23.605 26.816 20.021 28.7 16 28.7z"></path>
                 </svg>
               </span>
-            </Dropdown>
+            </button>
 
             {/* hidden element will be here */}
-            <DropdownContent isDropdownOpen={isDropdownOpen}>
+            <div className="drop-down-content">
               <ul>
-                <li className="font-bold"><a href="/login">Sign up</a></li>
-                <li><a href="/login">Log in</a></li>
-                <li><HrLightColor /></li>
-                <li><a href="/">Airbnb your home</a></li>
-                <li><a href="/">Host an experience</a></li>
-                <li><a href="/">Help</a></li>
+                <li className="font-bold">
+                  <a href="/login">Sign up</a>
+                </li>
+                <li>
+                  <a href="/login">Log in</a>
+                </li>
+                <li>
+                  <div className="hr-light-color"></div>
+                </li>
+                <li>
+                  <a href="/">Airbnb your home</a>
+                </li>
+                <li>
+                  <a href="/">Host an experience</a>
+                </li>
+                <li>
+                  <a href="/">Help</a>
+                </li>
               </ul>
-            </DropdownContent>
-          </ColFlexContainer>
-        </RowFlexContainerSpacedBetween>
+            </div>
+          </div>
+        </div>
       </div>
     </Nav>
   );
