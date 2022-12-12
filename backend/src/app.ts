@@ -2,6 +2,7 @@ import * as express from 'express'
 import * as bodyParser from 'body-parser'
 import * as dotenv from 'dotenv'
 import * as morgan from 'morgan'
+import * as cors from 'cors'
 import * as Sentry from '@sentry/node'
 import IController from './controllers/controller.interface'
 import ErrorHandler from './middleware/middleware.errorhandler'
@@ -63,6 +64,7 @@ class App {
   }
 
   private setupRequiredMiddleware (): void {
+    this.app.use(cors())
     this.app.use(bodyParser.json())
     this.app.use(morgan('dev'))
   }

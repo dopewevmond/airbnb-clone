@@ -37,6 +37,14 @@ class AuthController implements Controller {
 
   private setupRoutes (): void {
     this.router.post(
+      `${this.path}/email-exists`,
+      body('email')
+        .notEmpty().withMessage('email is missing from request')
+        .isEmail().withMessage('email entered is not valid'),
+      tryCatchWrapper(this.CheckEmailExists)
+    )
+
+    this.router.post(
       `${this.path}/login`,
       body('email')
         .notEmpty().withMessage('email is missing from request')
@@ -88,6 +96,19 @@ class AuthController implements Controller {
       authenticateJWT,
       tryCatchWrapper(this.LogoutHandler)
     )
+  }
+
+  private async CheckEmailExists (req: Request, res: Response, next: NextFunction): Promise<void> {
+    const errors = validationResult(req)
+    if (!errors.isEmpty()) {
+      return next(new BadRequestException(errors.array()[0].msg))
+    }
+    const { email } = req.body
+    const user = await userRepository.findOne({ where: { email_address: email } })
+    if (user == null) {
+      return next(new NotFoundException('user', 'email', email))
+    }
+    res.json({ message: 'email exists' })
   }
 
   private async LoginHandler (req: Request, res: Response, next: NextFunction): Promise<void> {

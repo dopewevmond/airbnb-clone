@@ -27,7 +27,8 @@ const AppDataSource = new DataSource({
   database: DB_NAME,
   migrations: [path.join(__dirname, '/migrations/*.ts')],
   entities: [User, Amenity, Listing, Room, Photo, RoomPhoto, ListingPhoto],
-  synchronize: false
+  synchronize: false,
+  logging: ['query']
 })
 
 AppDataSource.initialize()

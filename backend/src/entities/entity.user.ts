@@ -21,7 +21,7 @@ class User {
   @Column('varchar', { length: 255, unique: true })
     email_address: string
 
-  @Column('varchar', { length: 100 })
+  @Column('varchar', { length: 100, select: false })
     password_hash: string
 
   @Column('varchar', { length: 12, nullable: true })
@@ -42,7 +42,7 @@ class User {
   @Column('varchar', { length: 255, nullable: true })
     profile_photo: string | null
 
-  @Column({ type: 'boolean', default: false })
+  @Column({ type: 'boolean', default: false, select: false })
     has_verified_email: boolean
 
   @Column({ type: 'boolean', default: false })
