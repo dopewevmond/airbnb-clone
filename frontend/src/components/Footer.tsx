@@ -1,6 +1,5 @@
 import styled from "styled-components";
 import STYLES from "../Styles";
-
 export const FOOTER_BREAKPOINT_LG = "1128px";
 export const FOOTER_BREAKPOINT_MD = "740px";
 
@@ -13,247 +12,261 @@ const StyledFooter = styled.footer`
     padding: ${STYLES.elementSpacing * 2 + "em"} 0
       ${STYLES.elementSpacing + "em"};
   }
-`;
-const Row = styled.div`
-  display: none;
-  @media (min-width: ${FOOTER_BREAKPOINT_MD}) {
+  .row {
+    display: none;
+    @media (min-width: ${FOOTER_BREAKPOINT_MD}) {
+      display: flex;
+      flex-flow: column wrap;
+      justify-items: flex-start;
+    }
+    @media (min-width: ${FOOTER_BREAKPOINT_LG}) {
+      flex-direction: row;
+      gap: 4%;
+      > * {
+        flex-basis: 22%;
+      }
+    }
+  }
+  .unstyled-list {
+    @media (min-width: ${FOOTER_BREAKPOINT_MD}) {
+      margin: 0;
+      padding: 0;
+      list-style-type: none;
+      display: flex;
+      flex-flow: row wrap;
+      gap: 0.6em 3.33%;
+      > * {
+        flex-basis: 30%;
+      }
+      button {
+        color: #222222;
+      }
+    }
+    @media (min-width: ${FOOTER_BREAKPOINT_LG}) {
+      flex-direction: column;
+      justify-content: flex-start;
+      gap: 1em;
+      > * {
+        flex-basis: 100%;
+      }
+    }
+  }
+  .button-as-link {
+    background: none;
+    border: none;
+    padding: 0;
+    color: inherit;
+    text-align: left;
+    cursor: pointer;
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+  .footer-section-header {
+    font-weight: bold;
+    font-size: ${STYLES.smallFontSize + "em"};
+    margin-top: 0.4em;
+    margin-bottom: 0.4em;
+  }
+  .hide-on-lg {
+    display: block;
+    @media (min-width: ${FOOTER_BREAKPOINT_LG}) {
+      display: none;
+    }
+  }
+  .show-on-lg {
+    display: none;
+    @media (min-width: ${FOOTER_BREAKPOINT_LG}) {
+      display: block;
+    }
+  }
+  .show-inline-lg {
+    display: none;
+    @media (min-width: ${FOOTER_BREAKPOINT_LG}) {
+      display: inline;
+    }
+  }
+  .hr-light-color {
+    border-bottom: 1px solid ${STYLES.borderColor};
+    margin: ${STYLES.elementSpacing * 0.8 + "em"} 0;
+  }
+  .extra-links-container {
     display: flex;
     flex-flow: column wrap;
-    justify-items: flex-start;
-  }
-  @media (min-width: ${FOOTER_BREAKPOINT_LG}) {
-    flex-direction: row;
-    gap: 4%;
-    > * {
-      flex-basis: 22%;
+    gap: 1em;
+    @media (min-width: ${FOOTER_BREAKPOINT_LG}) {
+      flex-flow: row-reverse wrap;
+      justify-content: space-between;
+      gap: unset;
     }
   }
-`;
-const UnstyledList = styled.ul`
-  @media (min-width: ${FOOTER_BREAKPOINT_MD}) {
+  .social-icons-container {
+    display: flex;
+    justify-content: center;
+    gap: 3em;
+    color: #373737;
+    > * {
+      color: inherit;
+    }
+  }
+  .language {
+    display: flex;
+    align-items: center;
+  }
+  .globe-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  .social-icons {
+    list-style-type: none;
     margin: 0;
     padding: 0;
-    list-style-type: none;
     display: flex;
-    flex-flow: row wrap;
-    gap: 0.6em 3.33%;
-    > * {
-      flex-basis: 30%;
-    }
-    button {
-      color: #222222;
-    }
-  }
-  @media (min-width: ${FOOTER_BREAKPOINT_LG}) {
-    flex-direction: column;
-    justify-content: flex-start;
-    gap: 1em;
-    > * {
-      flex-basis: 100%;
-    }
-  }
-`;
-const ButtonsAsLinks = styled.button`
-  background: none;
-  border: none;
-  padding: 0;
-  color: inherit;
-  text-align: left;
-  cursor: pointer;
-  &:hover {
-    text-decoration: underline;
-  }
-`;
-const FooterSectionHeader = styled.p`
-  font-weight: bold;
-  font-size: ${STYLES.smallFontSize + "em"};
-  margin-top: 0.4em;
-  margin-bottom: 0.4em;
-`;
-const HideOnLargeDevices = styled.div`
-  display: block;
-  @media (min-width: ${FOOTER_BREAKPOINT_LG}) {
-    display: none;
-  }
-`;
-const ShowOnLargeDevices = styled.div`
-  display: none;
-  @media (min-width: ${FOOTER_BREAKPOINT_LG}) {
-    display: block;
-  }
-`;
-const ShowInlineOnLargeDevices = styled.div`
-  display: none;
-  @media (min-width: ${FOOTER_BREAKPOINT_LG}) {
-    display: inline;
-  }
-`;
-const HrLightColor = styled.div`
-  border-bottom: 1px solid ${STYLES.borderColor};
-  margin: ${STYLES.elementSpacing * 0.8 + "em"} 0;
-`;
-const ExtraLinksContainer = styled.div`
-  display: flex;
-  flex-flow: column wrap;
-  gap: 1em;
-  @media (min-width: ${FOOTER_BREAKPOINT_LG}) {
-    flex-flow: row-reverse wrap;
-    justify-content: space-between;
-    gap: unset;
-  }
-`;
-const SocialIconsContainer = styled.div`
-  display: flex;
-  justify-content: center;
-  gap: 3em;
-  color: #373737;
-  > * {
-    color: inherit;
-  }
-`;
-const Language = styled.div`
-  display: flex;
-  align-items: center;
-`;
-const GlobeButton = styled.span`
-  background: none;
-  border: none;
-  cursor: pointer;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-`;
-const SocialIcons = styled.ul`
-  list-style-type: none;
-  margin: 0;
-  padding: 0;
-  display: flex;
-  gap: 1.4em;
-  align-items: center;
-`;
-const SitemapContainer = styled.div`
-  display: flex;
-  flex-flow: column wrap;
-  align-content: center;
-
-  @media (min-width: ${FOOTER_BREAKPOINT_LG}) {
-    flex-flow: row wrap;
+    gap: 1.4em;
     align-items: center;
-    gap: 1em;
+  }
+  .sitemap-container {
+    display: flex;
+    flex-flow: column wrap;
+    align-content: center;
+    @media (min-width: ${FOOTER_BREAKPOINT_LG}) {
+      flex-flow: row wrap;
+      align-items: center;
+      gap: 1em;
+    }
+  }
+  .small-centered-text {
+    text-align: center;
+    font-size: ${STYLES.smallFontSize * 1.1 + "em"};
   }
 `;
-const SmallCenteredText = styled.div`
-  text-align: center;
-  font-size: ${STYLES.smallFontSize * 1.1 + "em"};
-`;
-const SitemapEtc = styled.div``;
 
 const Footer = () => {
   return (
     <StyledFooter>
       <div className="container">
-        <Row>
+        <div className="row">
           <div>
-            <FooterSectionHeader>Support</FooterSectionHeader>
-            <UnstyledList>
+            <p className="footer-section-header">Support</p>
+            <ul className="unstyled-list">
               <li>
-                <ButtonsAsLinks>Help Center</ButtonsAsLinks>
+                <button className="button-as-link">Help Center</button>
               </li>
               <li>
-                <ButtonsAsLinks>Air Cover</ButtonsAsLinks>
+                <button className="button-as-link">Air Cover</button>
               </li>
               <li>
-                <ButtonsAsLinks>
+                <button className="button-as-link">
                   Supporting people with disabities
-                </ButtonsAsLinks>
+                </button>
               </li>
               <li>
-                <ButtonsAsLinks>Cancellation Options</ButtonsAsLinks>
+                <button className="button-as-link">Cancellation Options</button>
               </li>
               <li>
-                <ButtonsAsLinks>Our Covid-19 Response</ButtonsAsLinks>
+                <button className="button-as-link">
+                  Our Covid-19 Response
+                </button>
               </li>
               <li>
-                <ButtonsAsLinks>Report a neighborhood concern</ButtonsAsLinks>
+                <button className="button-as-link">
+                  Report a neighborhood concern
+                </button>
               </li>
-            </UnstyledList>
-            <HideOnLargeDevices>
-              <HrLightColor />
-            </HideOnLargeDevices>
+            </ul>
+            <div className="hide-on-lg">
+              <div className="hr-light-color"></div>
+            </div>
           </div>
           <div>
-            <FooterSectionHeader>Community</FooterSectionHeader>
-            <UnstyledList>
+            <p className="footer-section-header">Community</p>
+            <ul className="unstyled-list">
               <li>
-                <ButtonsAsLinks>
+                <button className="button-as-link">
                   Airbnb.org: disaster relief housing
-                </ButtonsAsLinks>
+                </button>
               </li>
               <li>
-                <ButtonsAsLinks>Combating Discrimination</ButtonsAsLinks>
+                <button className="button-as-link">
+                  Combating Discrimination
+                </button>
               </li>
-            </UnstyledList>
-            <HideOnLargeDevices>
-              <HrLightColor />
-            </HideOnLargeDevices>
+            </ul>
+            <div className="hide-on-lg">
+              <div className="hr-light-color"></div>
+            </div>
           </div>
           <div>
-            <FooterSectionHeader>Hosting</FooterSectionHeader>
-            <UnstyledList>
+            <p className="footer-section-header">Hosting</p>
+            <ul className="unstyled-list">
               <li>
-                <ButtonsAsLinks>Airbnb your home</ButtonsAsLinks>
+                <button className="button-as-link">Airbnb your home</button>
               </li>
               <li>
-                <ButtonsAsLinks>Aircover for Hosts</ButtonsAsLinks>
+                <button className="button-as-link">Aircover for Hosts</button>
               </li>
               <li>
-                <ButtonsAsLinks>Explore hosting resources</ButtonsAsLinks>
+                <button className="button-as-link">
+                  Explore hosting resources
+                </button>
               </li>
               <li>
-                <ButtonsAsLinks>Visit our community forum</ButtonsAsLinks>
+                <button className="button-as-link">
+                  Visit our community forum
+                </button>
               </li>
               <li>
-                <ButtonsAsLinks>How to host responsibly</ButtonsAsLinks>
+                <button className="button-as-link">
+                  How to host responsibly
+                </button>
               </li>
-            </UnstyledList>
-            <HideOnLargeDevices>
-              <HrLightColor />
-            </HideOnLargeDevices>
+            </ul>
+            <div className="hide-on-lg">
+              <div className="hr-light-color"></div>
+            </div>
           </div>
           <div>
-            <FooterSectionHeader>Airbnb</FooterSectionHeader>
-            <UnstyledList>
+            <p className="footer-section-header">Airbnb</p>
+            <ul className="unstyled-list">
               <li>
-                <ButtonsAsLinks>Newsroom</ButtonsAsLinks>
+                <button className="button-as-link">Newsroom</button>
               </li>
               <li>
-                <ButtonsAsLinks>Learn about new features</ButtonsAsLinks>
+                <button className="button-as-link">
+                  Learn about new features
+                </button>
               </li>
               <li>
-                <ButtonsAsLinks>Letter from our founders</ButtonsAsLinks>
+                <button className="button-as-link">
+                  Letter from our founders
+                </button>
               </li>
               <li>
-                <ButtonsAsLinks>Careers</ButtonsAsLinks>
+                <button className="button-as-link">Careers</button>
               </li>
               <li>
-                <ButtonsAsLinks>Investors</ButtonsAsLinks>
+                <button className="button-as-link">Investors</button>
               </li>
               <li>
-                <ButtonsAsLinks>Gift cards</ButtonsAsLinks>
+                <button className="button-as-link">Gift cards</button>
               </li>
-            </UnstyledList>
-            <HideOnLargeDevices>
-              <HrLightColor />
-            </HideOnLargeDevices>
+            </ul>
+            <div className="hide-on-lg">
+              <div className="hr-light-color"></div>
+            </div>
           </div>
-        </Row>
-        <ShowOnLargeDevices>
-          <HrLightColor />
-        </ShowOnLargeDevices>
-        <ExtraLinksContainer>
-          <SocialIconsContainer>
-            <Language>
-              <GlobeButton>
+        </div>
+        <div className="show-on-lg">
+          <div className="hr-light-color"></div>
+        </div>
+        <div className="extra-links-container">
+          <div className="social-icons-container">
+            <div className="language">
+              <span className="globe-btn">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   fill="currentcolor"
@@ -264,13 +277,13 @@ const Footer = () => {
                 >
                   <path d="M8.002.25a7.77 7.77 0 017.748 7.776 7.75 7.75 0 01-7.521 7.72l-.246.004a7.75 7.75 0 01-7.73-7.513L.25 7.992A7.75 7.75 0 018.002.25zm1.949 8.5H6.048c.155 2.897 1.176 5.343 1.886 5.493l.068.007c.68-.002 1.72-2.365 1.932-5.23zm4.255 0h-2.752c-.091 1.96-.53 3.783-1.188 5.076a6.257 6.257 0 003.905-4.829zm-9.661 0h-2.75a6.257 6.257 0 003.934 5.075c-.615-1.208-1.036-2.875-1.162-4.686l-.022-.39zm1.188-6.576l-.115.046a6.257 6.257 0 00-3.823 5.03h2.75c.085-1.83.471-3.54 1.059-4.81zm2.262-.424c-.702.002-1.784 2.512-1.947 5.5h3.904C9.796 4.347 8.774 1.907 8.06 1.756l-.065-.007zm2.28.432l.023.05c.643 1.288 1.069 3.084 1.157 5.018h2.748a6.275 6.275 0 00-3.929-5.068z"></path>
                 </svg>
-              </GlobeButton>
-              <ButtonsAsLinks className="font-bold">
+              </span>
+              <button className="button-as-link font-bold">
                 &nbsp;English (US)
-              </ButtonsAsLinks>
-            </Language>
-            <ButtonsAsLinks className="font-bold"> $ USD</ButtonsAsLinks>
-            <SocialIcons>
+              </button>
+            </div>
+            <button className="button-as-link font-bold"> $ USD</button>
+            <ul className="social-icons">
               <li>
                 <a href="facebook.com/airbnb">
                   <svg
@@ -322,24 +335,24 @@ const Footer = () => {
                   </svg>
                 </a>
               </li>
-            </SocialIcons>
-          </SocialIconsContainer>
-          <SitemapContainer>
-            <SmallCenteredText>
+            </ul>
+          </div>
+          <div className="sitemap-container">
+            <div className="small-centered-text">
               <span>&copy;{new Date().getFullYear()} Airbnb, Inc.</span>
-            </SmallCenteredText>
-            <SitemapEtc>
-              <ShowInlineOnLargeDevices>
+            </div>
+            <div>
+              <div className="show-inline-lg">
                 <span>&nbsp;•&nbsp;</span>
-              </ShowInlineOnLargeDevices>
-              <ButtonsAsLinks>Privacy</ButtonsAsLinks>
+              </div>
+              <button className="button-as-link">Privacy</button>
               <span>&nbsp;•&nbsp;</span>
-              <ButtonsAsLinks>Terms</ButtonsAsLinks>
+              <button className="button-as-link">Terms</button>
               <span>&nbsp;•&nbsp;</span>
-              <ButtonsAsLinks>Sitemap</ButtonsAsLinks>
-            </SitemapEtc>
-          </SitemapContainer>
-        </ExtraLinksContainer>
+              <button className="button-as-link">Sitemap</button>
+            </div>
+          </div>
+        </div>
       </div>
     </StyledFooter>
   );
