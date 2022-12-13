@@ -4,7 +4,7 @@ import Listing from './entity.listing'
 @Entity('amenities')
 class Amenity {
   @PrimaryColumn()
-    ownedbyId: number
+    id: number
 
   @OneToOne(() => Listing, (listing) => listing.amenities, { onDelete: 'CASCADE' })
   @JoinColumn()
