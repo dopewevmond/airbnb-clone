@@ -1,6 +1,36 @@
 import styled from "styled-components";
 import STYLES from "../Styles";
-import { useState, FormEvent } from "react";
+
+const LoginForm = () => {
+  return (
+    <LoginFormContainer>
+      <div className="border-bottom">
+        <p className="font-bold text-center">Welcome back, John</p>
+      </div>
+      <div className="form-content">
+        <form noValidate>
+          <div className="input-container">
+            <input
+              className="input-field"
+              placeholder="Password"
+              type={"password"}
+            />
+            <span className="input-label floating-label">Password</span>
+            <span className="show-hide-password">{<>show</>}</span>
+          </div>
+
+          <div className="vertically-padded w-100">
+            <button className="styled-button" type="submit">
+              Log In
+            </button>
+          </div>
+        </form>
+      </div>
+    </LoginFormContainer>
+  );
+};
+
+export default LoginForm;
 
 const LoginFormContainer = styled.div`
   width: 90%;
@@ -78,46 +108,3 @@ const LoginFormContainer = styled.div`
     }
   }
 `;
-
-const LoginForm = () => {
-  const [isInputHidden, toggleInputVisibility] = useState(true);
-
-  function handleSubmit(e: FormEvent): void {
-    e.preventDefault();
-    console.log(e.target);
-  }
-
-  return (
-    <LoginFormContainer>
-      <div className="border-bottom">
-        <p className="font-bold text-center">Welcome back, John</p>
-      </div>
-      <div className="form-content">
-        <form noValidate onSubmit={handleSubmit}>
-          <div className="input-container">
-            <input
-              className="input-field"
-              placeholder="Password"
-              type={isInputHidden ? "password" : "text"}
-            />
-            <span className="input-label floating-label">Password</span>
-            <span
-              className="show-hide-password"
-              onClick={() => toggleInputVisibility(!isInputHidden)}
-            >
-              {isInputHidden ? <>show</> : <>hide</>}
-            </span>
-          </div>
-
-          <div className="vertically-padded w-100">
-            <button className="styled-button" type="submit">
-              Log In
-            </button>
-          </div>
-        </form>
-      </div>
-    </LoginFormContainer>
-  );
-};
-
-export default LoginForm;

@@ -1,6 +1,73 @@
 import styled from "styled-components";
 import STYLES from "../Styles";
-import { useState } from 'react'
+
+const SignupForm = () => {
+  return (
+    <LoginFormContainer>
+      <div className="border-bottom">
+        <p className="font-bold text-center">Finish signing up</p>
+      </div>
+      <div className="form-content">
+        <form noValidate>
+          <div className="vertically-padded">
+            <div className="input-container">
+              <input
+                type="text"
+                className={"input-field"}
+                placeholder="First name"
+                name="firstName"
+              />
+              <span className="input-label">First name</span>
+            </div>
+          </div>
+          <div className="vertically-padded">
+            <div className="input-container">
+              <input
+                type="text"
+                className={"input-field"}
+                placeholder="Last name"
+                name="lastName"
+              />
+              <span className="input-label">Last name</span>
+            </div>
+          </div>
+          <div className="vertically-padded">
+            <div className="input-container">
+              <input
+                type="text"
+                className={"input-field"}
+                placeholder="Email"
+                name="email"
+              />
+              <span className="input-label">Email</span>
+            </div>
+          </div>
+
+          <div className="vertically-padded">
+            <div className="input-container">
+              <input
+                className={"input-field"}
+                placeholder="Password"
+                type={"password"}
+                name="password"
+              />
+              <span className="input-label floating-label">Password</span>
+              <span className="show-hide-password">{<>show</>}</span>
+            </div>
+          </div>
+
+          <div className="vertically-padded w-100">
+            <button className="styled-button" type="submit">
+              Sign Up
+            </button>
+          </div>
+        </form>
+      </div>
+    </LoginFormContainer>
+  );
+};
+
+export default SignupForm;
 
 const LoginFormContainer = styled.div`
   width: 90%;
@@ -53,6 +120,9 @@ const LoginFormContainer = styled.div`
     transition: 0.2s ease all;
     opacity: 0.3;
   }
+  .input-has-error {
+    border: 1px solid ${STYLES.mainBackgroundColor};
+  }
   .styled-button {
     background: ${STYLES.mainBackgroundColor};
     color: white;
@@ -79,70 +149,3 @@ const LoginFormContainer = styled.div`
     cursor: pointer;
   }
 `;
-
-const SignupForm = () => {
-  const [isInputHidden, toggleInputVisibility] = useState(true);
-
-  return (
-    <LoginFormContainer>
-      <div className="border-bottom">
-        <p className="font-bold text-center">Finish signing up</p>
-      </div>
-      <div className="form-content">
-        <form noValidate>
-          <div className="vertically-padded">
-            <div className="input-container">
-              <input
-                type="text"
-                className="input-field"
-                placeholder="First name"
-              />
-              <span className="input-label">First name</span>
-            </div>
-          </div>
-          <div className="vertically-padded">
-            <div className="input-container">
-              <input
-                type="text"
-                className="input-field"
-                placeholder="Last name"
-              />
-              <span className="input-label">Last name</span>
-            </div>
-          </div>
-          <div className="vertically-padded">
-            <div className="input-container">
-              <input type="text" className="input-field" placeholder="Email" />
-              <span className="input-label">Email</span>
-            </div>
-          </div>
-
-          <div className="vertically-padded">
-            <div className="input-container">
-              <input
-                className="input-field"
-                placeholder="Password"
-                type={isInputHidden ? "password" : "text"}
-              />
-              <span className="input-label floating-label">Password</span>
-              <span
-                className="show-hide-password"
-                onClick={() => toggleInputVisibility(!isInputHidden)}
-              >
-                {isInputHidden ? <>show</> : <>hide</>}
-              </span>
-            </div>
-          </div>
-
-          <div className="vertically-padded w-100">
-            <button className="styled-button" type="submit">
-              Sign Up
-            </button>
-          </div>
-        </form>
-      </div>
-    </LoginFormContainer>
-  );
-};
-
-export default SignupForm;

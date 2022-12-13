@@ -3,148 +3,6 @@ import STYLES from "../Styles";
 export const FOOTER_BREAKPOINT_LG = "1128px";
 export const FOOTER_BREAKPOINT_MD = "740px";
 
-const StyledFooter = styled.footer`
-  display: none;
-  @media (min-width: ${FOOTER_BREAKPOINT_MD}) {
-    display: block;
-    background-color: #f7f7f7;
-    border-top: 1px solid #dddddd;
-    padding: ${STYLES.elementSpacing * 2 + "em"} 0
-      ${STYLES.elementSpacing + "em"};
-  }
-  .row {
-    display: none;
-    @media (min-width: ${FOOTER_BREAKPOINT_MD}) {
-      display: flex;
-      flex-flow: column wrap;
-      justify-items: flex-start;
-    }
-    @media (min-width: ${FOOTER_BREAKPOINT_LG}) {
-      flex-direction: row;
-      gap: 4%;
-      > * {
-        flex-basis: 22%;
-      }
-    }
-  }
-  .unstyled-list {
-    @media (min-width: ${FOOTER_BREAKPOINT_MD}) {
-      margin: 0;
-      padding: 0;
-      list-style-type: none;
-      display: flex;
-      flex-flow: row wrap;
-      gap: 0.6em 3.33%;
-      > * {
-        flex-basis: 30%;
-      }
-      button {
-        color: #222222;
-      }
-    }
-    @media (min-width: ${FOOTER_BREAKPOINT_LG}) {
-      flex-direction: column;
-      justify-content: flex-start;
-      gap: 1em;
-      > * {
-        flex-basis: 100%;
-      }
-    }
-  }
-  .button-as-link {
-    background: none;
-    border: none;
-    padding: 0;
-    color: inherit;
-    text-align: left;
-    cursor: pointer;
-    &:hover {
-      text-decoration: underline;
-    }
-  }
-  .footer-section-header {
-    font-weight: bold;
-    font-size: ${STYLES.smallFontSize + "em"};
-    margin-top: 0.4em;
-    margin-bottom: 0.4em;
-  }
-  .hide-on-lg {
-    display: block;
-    @media (min-width: ${FOOTER_BREAKPOINT_LG}) {
-      display: none;
-    }
-  }
-  .show-on-lg {
-    display: none;
-    @media (min-width: ${FOOTER_BREAKPOINT_LG}) {
-      display: block;
-    }
-  }
-  .show-inline-lg {
-    display: none;
-    @media (min-width: ${FOOTER_BREAKPOINT_LG}) {
-      display: inline;
-    }
-  }
-  .hr-light-color {
-    border-bottom: 1px solid ${STYLES.borderColor};
-    margin: ${STYLES.elementSpacing * 0.8 + "em"} 0;
-  }
-  .extra-links-container {
-    display: flex;
-    flex-flow: column wrap;
-    gap: 1em;
-    @media (min-width: ${FOOTER_BREAKPOINT_LG}) {
-      flex-flow: row-reverse wrap;
-      justify-content: space-between;
-      gap: unset;
-    }
-  }
-  .social-icons-container {
-    display: flex;
-    justify-content: center;
-    gap: 3em;
-    color: #373737;
-    > * {
-      color: inherit;
-    }
-  }
-  .language {
-    display: flex;
-    align-items: center;
-  }
-  .globe-btn {
-    background: none;
-    border: none;
-    cursor: pointer;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-  }
-  .social-icons {
-    list-style-type: none;
-    margin: 0;
-    padding: 0;
-    display: flex;
-    gap: 1.4em;
-    align-items: center;
-  }
-  .sitemap-container {
-    display: flex;
-    flex-flow: column wrap;
-    align-content: center;
-    @media (min-width: ${FOOTER_BREAKPOINT_LG}) {
-      flex-flow: row wrap;
-      align-items: center;
-      gap: 1em;
-    }
-  }
-  .small-centered-text {
-    text-align: center;
-    font-size: ${STYLES.smallFontSize * 1.1 + "em"};
-  }
-`;
-
 const Footer = () => {
   return (
     <StyledFooter>
@@ -359,3 +217,145 @@ const Footer = () => {
 };
 
 export default Footer;
+
+const StyledFooter = styled.footer`
+  display: none;
+  @media (min-width: ${FOOTER_BREAKPOINT_MD}) {
+    display: block;
+    background-color: #f7f7f7;
+    border-top: 1px solid #dddddd;
+    padding: ${STYLES.elementSpacing * 2 + "em"} 0
+      ${STYLES.elementSpacing + "em"};
+  }
+  .row {
+    display: none;
+    @media (min-width: ${FOOTER_BREAKPOINT_MD}) {
+      display: flex;
+      flex-flow: column wrap;
+      justify-items: flex-start;
+    }
+    @media (min-width: ${FOOTER_BREAKPOINT_LG}) {
+      flex-direction: row;
+      gap: 4%;
+      > * {
+        flex-basis: 22%;
+      }
+    }
+  }
+  .unstyled-list {
+    @media (min-width: ${FOOTER_BREAKPOINT_MD}) {
+      margin: 0;
+      padding: 0;
+      list-style-type: none;
+      display: flex;
+      flex-flow: row wrap;
+      gap: 0.6em 3.33%;
+      > * {
+        flex-basis: 30%;
+      }
+      button {
+        color: #222222;
+      }
+    }
+    @media (min-width: ${FOOTER_BREAKPOINT_LG}) {
+      flex-direction: column;
+      justify-content: flex-start;
+      gap: 1em;
+      > * {
+        flex-basis: 100%;
+      }
+    }
+  }
+  .button-as-link {
+    background: none;
+    border: none;
+    padding: 0;
+    color: inherit;
+    text-align: left;
+    cursor: pointer;
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+  .footer-section-header {
+    font-weight: bold;
+    font-size: ${STYLES.smallFontSize + "em"};
+    margin-top: 0.4em;
+    margin-bottom: 0.4em;
+  }
+  .hide-on-lg {
+    display: block;
+    @media (min-width: ${FOOTER_BREAKPOINT_LG}) {
+      display: none;
+    }
+  }
+  .show-on-lg {
+    display: none;
+    @media (min-width: ${FOOTER_BREAKPOINT_LG}) {
+      display: block;
+    }
+  }
+  .show-inline-lg {
+    display: none;
+    @media (min-width: ${FOOTER_BREAKPOINT_LG}) {
+      display: inline;
+    }
+  }
+  .hr-light-color {
+    border-bottom: 1px solid ${STYLES.borderColor};
+    margin: ${STYLES.elementSpacing * 0.8 + "em"} 0;
+  }
+  .extra-links-container {
+    display: flex;
+    flex-flow: column wrap;
+    gap: 1em;
+    @media (min-width: ${FOOTER_BREAKPOINT_LG}) {
+      flex-flow: row-reverse wrap;
+      justify-content: space-between;
+      gap: unset;
+    }
+  }
+  .social-icons-container {
+    display: flex;
+    justify-content: center;
+    gap: 3em;
+    color: #373737;
+    > * {
+      color: inherit;
+    }
+  }
+  .language {
+    display: flex;
+    align-items: center;
+  }
+  .globe-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  .social-icons {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    gap: 1.4em;
+    align-items: center;
+  }
+  .sitemap-container {
+    display: flex;
+    flex-flow: column wrap;
+    align-content: center;
+    @media (min-width: ${FOOTER_BREAKPOINT_LG}) {
+      flex-flow: row wrap;
+      align-items: center;
+      gap: 1em;
+    }
+  }
+  .small-centered-text {
+    text-align: center;
+    font-size: ${STYLES.smallFontSize * 1.1 + "em"};
+  }
+`;

@@ -1,11 +1,11 @@
 import styled from "styled-components";
 import STYLES from "../Styles";
 
-const MainAuthForm = () => {
+const ForgotPasswordForm = () => {
   return (
-    <AuthFormContainer>
+    <ForgotPasswordContainer>
       <div className="border-bottom">
-        <p className="font-bold text-center">Log in or sign up</p>
+        <p className="font-bold text-center">Forgot password?</p>
       </div>
       <div className="form-content">
         <div className="vertically-padded">
@@ -24,18 +24,18 @@ const MainAuthForm = () => {
           </div>
           <div className="vertically-padded w-100">
             <button className="styled-button" type="submit">
-              Submit
+              Send reset link
             </button>
           </div>
         </form>
       </div>
-    </AuthFormContainer>
+    </ForgotPasswordContainer>
   );
 };
 
-export default MainAuthForm;
+export default ForgotPasswordForm;
 
-const AuthFormContainer = styled.div`
+const ForgotPasswordContainer = styled.div`
   width: 90%;
   margin: ${STYLES.elementSpacing * 2 + "em"} auto
     ${STYLES.elementSpacing + "em"};
@@ -109,4 +109,4 @@ const AuthFormContainer = styled.div`
     font-size: ${STYLES.smallFontSize + "em"};
     color: ${STYLES.mainBackgroundColor};
   }
-`;
+`
