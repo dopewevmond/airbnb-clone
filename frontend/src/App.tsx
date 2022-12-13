@@ -1,12 +1,17 @@
-import "./App.css";
+import 'bootstrap/dist/css/bootstrap.min.css'
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import AuthenticationPage from "./pages/AuthenticationPage";
+import LoginPage from './pages/LoginPage';
+import SignupPage from './pages/SignupPage';
+import ForgotPasswordPage from './pages/ForgotPasswordPage';
 
 function App() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/login-signup" element={<AuthenticationPage />} />
+        <Route path="/login" element={<LoginPage />} />
+        <Route path='/signup' element={<SignupPage />} />
+        <Route path='/forgot-password' element={<ForgotPasswordPage />} />
+        <Route path='*' element={<LoginPage />} />
       </Routes>
     </BrowserRouter>
   );
