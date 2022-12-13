@@ -1,9 +1,9 @@
-import { Entity, Column, PrimaryColumn, OneToOne, JoinColumn } from 'typeorm'
+import { Entity, Column, PrimaryGeneratedColumn, OneToOne, JoinColumn } from 'typeorm'
 import Listing from './entity.listing'
 
 @Entity('amenities')
 class Amenity {
-  @PrimaryColumn()
+  @PrimaryGeneratedColumn()
     id: number
 
   @OneToOne(() => Listing, (listing) => listing.amenities, { onDelete: 'CASCADE' })
