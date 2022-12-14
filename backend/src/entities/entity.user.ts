@@ -1,4 +1,5 @@
 import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm'
+import Booking from './entity.booking'
 import Listing from './entity.listing'
 import ListingReview from './entity.listingreview'
 
@@ -15,6 +16,9 @@ class User {
 
   @OneToMany(() => Listing, (listing) => listing.owner)
     listings: Listing[]
+
+  @OneToMany(() => Booking, (booking) => booking.owner)
+    bookings: Booking[]
 
   @Column('varchar', { length: 50 })
     first_name: string

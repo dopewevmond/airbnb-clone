@@ -2,7 +2,7 @@ import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm'
 import Listing from './entity.listing'
 import User from './entity.user'
 
-@Entity()
+@Entity('listing_reviews')
 class ListingReview {
   @PrimaryGeneratedColumn()
     id: number

@@ -4,6 +4,7 @@ import Room from './entity.room'
 import User from './entity.user'
 import ListingPhoto from './entity.listingphoto'
 import ListingReview from './entity.listingreview'
+import Booking from './entity.booking'
 
 type RegionType = 'asia' | 'africa' | 'north america' | 'south america' | 'europe' | 'australia'
 export const regions = ['asia', 'africa', 'north america', 'south america', 'europe', 'australia']
@@ -51,6 +52,9 @@ class Listing {
 
   @OneToMany(() => ListingPhoto, (listingPhoto) => listingPhoto.listing)
     photos: ListingPhoto[]
+
+  @OneToMany(() => Booking, (booking) => booking.listing)
+    bookings: Booking[]
 
   @Column('varchar', { length: 100 })
     name: string
