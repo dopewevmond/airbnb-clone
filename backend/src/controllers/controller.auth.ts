@@ -37,14 +37,6 @@ class AuthController implements Controller {
 
   private setupRoutes (): void {
     this.router.post(
-      `${this.path}/email-exists`,
-      body('email')
-        .notEmpty().withMessage('email is missing from request')
-        .isEmail().withMessage('email entered is not valid'),
-      tryCatchWrapper(this.CheckEmailExists)
-    )
-
-    this.router.post(
       `${this.path}/login`,
       body('email')
         .notEmpty().withMessage('email is missing from request')
@@ -60,8 +52,7 @@ class AuthController implements Controller {
         .isEmail().withMessage('email entered is not valid'),
       body('password')
         .notEmpty().withMessage('password is missing from request')
-        .isLength({ min: 8 }).withMessage('password should be at least 8 characters long')
-        .isStrongPassword({ minSymbols: 0 }).withMessage('password should contain at least one each of a number, an uppercase and lowercase character'),
+        .isLength({ min: 8 }).withMessage('password should be at least 8 characters long'),
       body('firstName', 'first name missing from request').notEmpty(),
       body('lastName', 'last name missing from request').notEmpty(),
       tryCatchWrapper(this.RegisterHandler)
@@ -98,26 +89,13 @@ class AuthController implements Controller {
     )
   }
 
-  private async CheckEmailExists (req: Request, res: Response, next: NextFunction): Promise<void> {
-    const errors = validationResult(req)
-    if (!errors.isEmpty()) {
-      return next(new BadRequestException(errors.array()[0].msg))
-    }
-    const { email } = req.body
-    const user = await userRepository.findOne({ where: { email_address: email } })
-    if (user == null) {
-      return next(new NotFoundException('user', 'email', email))
-    }
-    res.json({ message: 'email exists' })
-  }
-
   private async LoginHandler (req: Request, res: Response, next: NextFunction): Promise<void> {
     const errors = validationResult(req)
     if (!errors.isEmpty()) {
       return next(new BadRequestException(errors.array()[0].msg))
     }
     const { email, password } = req.body
-    const user = await userRepository.findOne({ where: { email_address: email } })
+    const user = await userRepository.findOne({ where: { email_address: email }, select: ['email_address', 'password_hash', 'is_super_host', 'has_verified_email'] })
     if (user == null) {
       return next(new WrongCredentialsException())
     }
