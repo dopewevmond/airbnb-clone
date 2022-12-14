@@ -2,7 +2,6 @@ import { Request, Response, NextFunction, Router } from 'express'
 import * as jwt from 'jsonwebtoken'
 import * as redis from 'redis'
 import * as bcrypt from 'bcrypt'
-import { body, validationResult } from 'express-validator'
 import Controller from './controller.interface'
 import IRedisPrefix from '../types/type.redisprefix'
 import AppDataSource from '../datasource'
@@ -15,8 +14,9 @@ import { signAccessToken, signRefreshToken, signPasswordResetToken } from '../ut
 import HttpException from '../exceptions/exception.http'
 import WrongCredentialsException from '../exceptions/exception.wrongcreds'
 import UserExistsException from '../exceptions/exception.userexists'
-import BadRequestException from '../exceptions/exception.badrequest'
 import NotFoundException from '../exceptions/exception.notfound'
+import validateInputs from '../middleware/middleware.validate'
+import { LoginSchema, RefreshSchema, ResetPasswordSchema, ResetRequestSchema, SignupSchema } from '../schema/schema.auth'
 
 const userRepository = AppDataSource.getRepository(User)
 const redisClient: redis.RedisClientType = singletonRedisClient()
@@ -36,64 +36,15 @@ class AuthController implements Controller {
   }
 
   private setupRoutes (): void {
-    this.router.post(
-      `${this.path}/login`,
-      body('email')
-        .notEmpty().withMessage('email is missing from request')
-        .isEmail().withMessage('email entered is not valid'),
-      body('password', 'password is missing from request').notEmpty(),
-      tryCatchWrapper(this.LoginHandler)
-    )
-
-    this.router.post(
-      `${this.path}/signup`,
-      body('email')
-        .notEmpty().withMessage('email is missing from request')
-        .isEmail().withMessage('email entered is not valid'),
-      body('password')
-        .notEmpty().withMessage('password is missing from request')
-        .isLength({ min: 8 }).withMessage('password should be at least 8 characters long'),
-      body('firstName', 'first name missing from request').notEmpty(),
-      body('lastName', 'last name missing from request').notEmpty(),
-      tryCatchWrapper(this.RegisterHandler)
-    )
-
-    this.router.post(
-      `${this.path}/reset-request`,
-      body('email')
-        .notEmpty().withMessage('email is missing from request')
-        .isEmail().withMessage('email entered is not valid'),
-      tryCatchWrapper(this.PasswordResetRequestHandler)
-    )
-
-    this.router.post(
-      `${this.path}/reset`,
-      body('token', 'password reset token missing from request').notEmpty(),
-      body('newPassword')
-        .notEmpty().withMessage('password is missing from request')
-        .isLength({ min: 8 }).withMessage('password should be at least 8 characters long')
-        .isStrongPassword({ minSymbols: 0 }).withMessage('password should contain at least one each of a number, an uppercase and lowercase character'),
-      tryCatchWrapper(this.PasswordResetHandlerPost)
-    )
-
-    this.router.post(
-      `${this.path}/refresh-token`,
-      body('token', 'refresh token missing from request').notEmpty(),
-      tryCatchWrapper(this.RefreshTokenHandler)
-    )
-
-    this.router.post(
-      `${this.path}/logout`,
-      authenticateJWT,
-      tryCatchWrapper(this.LogoutHandler)
-    )
+    this.router.post(`${this.path}/login`, validateInputs(LoginSchema), tryCatchWrapper(this.LoginHandler))
+    this.router.post(`${this.path}/signup`, validateInputs(SignupSchema), tryCatchWrapper(this.RegisterHandler))
+    this.router.post(`${this.path}/reset-request`, validateInputs(ResetRequestSchema), tryCatchWrapper(this.PasswordResetRequestHandler))
+    this.router.post(`${this.path}/reset`, validateInputs(ResetPasswordSchema), tryCatchWrapper(this.PasswordResetHandlerPost))
+    this.router.post(`${this.path}/refresh-token`, validateInputs(RefreshSchema), tryCatchWrapper(this.RefreshTokenHandler))
+    this.router.post(`${this.path}/logout`, authenticateJWT, tryCatchWrapper(this.LogoutHandler))
   }
 
   private async LoginHandler (req: Request, res: Response, next: NextFunction): Promise<void> {
-    const errors = validationResult(req)
-    if (!errors.isEmpty()) {
-      return next(new BadRequestException(errors.array()[0].msg))
-    }
     const { email, password } = req.body
     const user = await userRepository.findOne({ where: { email_address: email }, select: ['email_address', 'password_hash', 'is_super_host', 'has_verified_email'] })
     if (user == null) {
@@ -112,10 +63,6 @@ class AuthController implements Controller {
   }
 
   private async RegisterHandler (req: Request, res: Response, next: NextFunction): Promise<void> {
-    const errors = validationResult(req)
-    if (!errors.isEmpty()) {
-      return next(new BadRequestException(errors.array()[0].msg))
-    }
     const { email, password, firstName, lastName } = req.body
     const findEmail = await userRepository.findOne({ where: { email_address: email } })
     if (findEmail != null) {
@@ -147,10 +94,6 @@ class AuthController implements Controller {
   }
 
   private async PasswordResetRequestHandler (req: Request, res: Response, next: NextFunction): Promise<void> {
-    const errors = validationResult(req)
-    if (!errors.isEmpty()) {
-      return next(new BadRequestException(errors.array()[0].msg))
-    }
     const { email } = req.body
     const user = await userRepository.findOne({ where: { email_address: email } })
     if (user == null) {
@@ -162,10 +105,6 @@ class AuthController implements Controller {
   }
 
   private async PasswordResetHandlerPost (req: Request, res: Response, next: NextFunction): Promise<void> {
-    const errors = validationResult(req)
-    if (!errors.isEmpty()) {
-      return next(new BadRequestException(errors.array()[0].msg))
-    }
     const { token, newPassword } = req.body
     const user = jwt.verify(token, SECRET) as jwt.JwtPayload
     const email = user.email as string
