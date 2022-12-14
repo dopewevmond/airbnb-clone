@@ -3,6 +3,7 @@ import Amenity from './entity.amenity'
 import Room from './entity.room'
 import User from './entity.user'
 import ListingPhoto from './entity.listingphoto'
+import ListingReview from './entity.listingreview'
 
 type RegionType = 'asia' | 'africa' | 'north america' | 'south america' | 'europe' | 'australia'
 export const regions = ['asia', 'africa', 'north america', 'south america', 'europe', 'australia']
@@ -35,6 +36,9 @@ export const listings = [
 class Listing {
   @PrimaryGeneratedColumn()
     id: number
+
+  @OneToMany(() => ListingReview, (listingReview) => listingReview.listing)
+    reviews: ListingReview[]
 
   @OneToOne(() => Amenity, (amenity) => amenity.owned_by)
     amenities: Amenity

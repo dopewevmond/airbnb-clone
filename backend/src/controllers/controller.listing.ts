@@ -121,7 +121,7 @@ class ListingController implements Controller {
   private async DeleteListing (req: Request, res: Response, next: NextFunction): Promise<void> {
     const { id } = req.params
     const listing = await listingRepository.findOneOrFail({ where: { id: parseInt(id) }, relations: { owner: true } })
-    const isAllowedToEdit = listing?.owner.email_address === res.locals.user?.email
+    const isAllowedToEdit = listing.owner.email_address === res.locals.user?.email
     if (!isAllowedToEdit) {
       return next(new HttpException(403, 'You are not authorized to perform this action'))
     }

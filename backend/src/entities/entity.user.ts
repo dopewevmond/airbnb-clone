@@ -1,5 +1,6 @@
 import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm'
 import Listing from './entity.listing'
+import ListingReview from './entity.listingreview'
 
 export type LanguageType = 'english' | 'french' | 'spanish'
 const languages = ['english', 'french', 'spanish']
@@ -8,6 +9,9 @@ const languages = ['english', 'french', 'spanish']
 class User {
   @PrimaryGeneratedColumn()
     id: number
+
+  @OneToMany(() => ListingReview, (listingReview) => listingReview.reviewer)
+    listing_reviews: ListingReview[]
 
   @OneToMany(() => Listing, (listing) => listing.owner)
     listings: Listing[]
