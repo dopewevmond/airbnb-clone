@@ -3,7 +3,7 @@ import Listing from './entity.listing'
 import ListingReview from './entity.listingreview'
 
 export type LanguageType = 'english' | 'french' | 'spanish'
-const languages = ['english', 'french', 'spanish']
+export const languages = ['english', 'french', 'spanish']
 
 @Entity('users')
 class User {
@@ -19,16 +19,16 @@ class User {
   @Column('varchar', { length: 50 })
     first_name: string
 
-  @Column('varchar', { length: 50 })
+  @Column('varchar', { length: 50, select: false })
     last_name: string
 
-  @Column('varchar', { length: 255, unique: true })
+  @Column('varchar', { length: 255, unique: true, select: false })
     email_address: string
 
   @Column('varchar', { length: 100, select: false })
     password_hash: string
 
-  @Column('varchar', { length: 12, nullable: true })
+  @Column('varchar', { length: 12, nullable: true, select: false })
     phone_number: string | null
 
   @Column({ type: 'timestamptz' })

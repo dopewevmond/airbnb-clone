@@ -1,5 +1,4 @@
 import { Request, Response, NextFunction, Router } from 'express'
-import { body, param, validationResult } from 'express-validator'
 import AppDataSource from '../datasource'
 import User from '../entities/entity.user'
 import BadRequestException from '../exceptions/exception.badrequest'
@@ -7,7 +6,9 @@ import NotFoundException from '../exceptions/exception.notfound'
 import tryCatchWrapper from '../utils/util.trycatchwrapper'
 import Controller from './controller.interface'
 import authenticateJWT from '../middleware/middleware.verifyjwt'
-import unprotectedRouteLoadUser from '../middleware/middleware.loaduserdetails'
+import validateInputs from '../middleware/middleware.validate'
+import { IdSchema } from '../schema/schema.listing'
+import { EditProfileSchema, OptionalProfileSchema } from '../schema/schema.user'
 
 const userRepository = AppDataSource.getRepository(User)
 
@@ -20,85 +21,31 @@ class UserController implements Controller {
   }
 
   private setupRoutes (): void {
-    this.router.get(
-      `${this.path}/profile/:id`,
-      param('id', 'user id must be a number').isNumeric(),
-      unprotectedRouteLoadUser,
-      tryCatchWrapper(this.GetProfileInfoHandler)
-    )
-
-    this.router.patch(
-      `${this.path}/profile`,
-      body('firstName')
-        .optional()
-        .isString().withMessage('first name is not a valid string')
-        .isLength({ max: 50 }).withMessage('first name is longer than the maximum of 50 characters'),
-      body('lastName')
-        .optional()
-        .isString().withMessage('last name is not a valid string')
-        .isLength({ max: 50 }).withMessage('last name is longer than the maximum of 50 characters'),
-      body('phoneNumber')
-        .optional()
-        .isNumeric().withMessage('phone number is not numeric')
-        .isLength({ min: 12, max: 12 }).withMessage('phone number is not 12 characters in length. country code(3) and number (9)'),
-      body('nativeLanguage')
-        .optional()
-        .isIn(['english', 'spanish', 'french']).withMessage('language must be either "english", "spanish" or "french"'),
-      body('secondaryLanguage')
-        .optional()
-        .isIn(['english', 'spanish', 'french']).withMessage('language must be either "english", "spanish" or "french"'),
-      body('bio')
-        .optional()
-        .isLength({ min: 255 }).withMessage('bio is longer than the maximum of 250 characters'),
-      authenticateJWT,
-      tryCatchWrapper(this.EditProfileHandler)
-    )
-
-    this.router.patch(
-      `${this.path}/profile/nullify-fields`,
-      body('phoneNumber')
-        .optional()
-        .isIn([true, 'true']).withMessage('phone number field should be set to true if present'),
-      body('secondaryLanguage')
-        .optional()
-        .isIn([true, 'true']).withMessage('secondary language field should be set to true if present'),
-      body('bio')
-        .optional()
-        .isIn([true, 'true']).withMessage('bio field should be set to true if present'),
-      body('profilePhoto')
-        .optional()
-        .isIn([true, 'true']).withMessage('profile photo field should be set to true if present'),
-      authenticateJWT,
-      tryCatchWrapper(this.NullifyFieldHandler)
+    this.router.use(authenticateJWT)
+    this.router.get(`${this.path}/profile/:id`, validateInputs(IdSchema), tryCatchWrapper(this.GetProfileInfoHandler))
+    this.router.patch(`${this.path}/profile`, validateInputs(EditProfileSchema), tryCatchWrapper(this.EditProfileHandler))
+    this.router.patch(`${this.path}/profile/nullify-fields`, validateInputs(OptionalProfileSchema), tryCatchWrapper(this.NullifyFieldHandler)
     )
   }
 
   private async GetProfileInfoHandler (req: Request, res: Response, next: NextFunction): Promise<void> {
-    const errors = validationResult(req)
-    if (!errors.isEmpty()) {
-      return next(new BadRequestException(errors.array()[0].msg))
-    }
     const { id } = req.params
-    const user = await userRepository.findOneBy({ id: parseInt(id) })
-    if (user == null) {
-      return next(new NotFoundException('user', 'id', id))
+    const fullUserDetails = await userRepository.findOneOrFail({
+      where: { id: parseInt(id) },
+      select: ['id', 'first_name', 'last_name', 'email_address', 'bio', 'created_at', 'phone_number', 'created_at', 'native_language', 'secondary_language', 'is_super_host', 'has_verified_email', 'profile_photo']
+    })
+    if (fullUserDetails.email_address === res.locals.user?.email) {
+      res.json({ user: fullUserDetails })
+    } else {
+      const user = await userRepository.findOneOrFail({
+        where: { id: parseInt(id) },
+        select: ['first_name', 'created_at', 'native_language', 'secondary_language', 'bio', 'profile_photo', 'is_super_host']
+      })
+      res.json({ user })
     }
-    const emailOfAuthenticatedUser = res.locals.user?.email as string
-    const userDetails = { ...user } as any
-    delete userDetails.id
-    delete userDetails.password_hash
-    if (emailOfAuthenticatedUser !== user.email_address) {
-      delete userDetails.last_name
-      delete userDetails.has_verified_email
-    }
-    res.json({ user: userDetails })
   }
 
   private async EditProfileHandler (req: Request, res: Response, next: NextFunction): Promise<void> {
-    const errors = validationResult(req)
-    if (!errors.isEmpty()) {
-      return next(new BadRequestException(errors.array()[0].msg))
-    }
     const { firstName, lastName, phoneNumber, nativeLanguage, secondaryLanguage, bio } = req.body
     const emailOfUserToEditProfile = res.locals.user?.email as string
     if (emailOfUserToEditProfile == null) {
@@ -119,19 +66,12 @@ class UserController implements Controller {
   }
 
   private async NullifyFieldHandler (req: Request, res: Response, next: NextFunction): Promise<void> {
-    const errors = validationResult(req)
-    if (!errors.isEmpty()) {
-      return next(new BadRequestException(errors.array()[0].msg))
-    }
     const { phoneNumber, secondaryLanguage, bio, profilePhoto } = req.body
     const emailOfUser = res.locals.user?.email as string
     if (emailOfUser == null) {
       return next(new BadRequestException('could not find email of user to edit profile'))
     }
-    const userToEditProfile = await userRepository.findOne({ where: { email_address: emailOfUser } })
-    if (userToEditProfile == null) {
-      return next(new NotFoundException('user', 'email', emailOfUser))
-    }
+    const userToEditProfile = await userRepository.findOneOrFail({ where: { email_address: emailOfUser } })
     if (phoneNumber != null) {
       userToEditProfile.phone_number = null
     }
