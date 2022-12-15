@@ -25,8 +25,11 @@ class Booking {
   @Column({ type: 'integer' })
     total_amount: number
 
-  @Column({ type: 'boolean' })
+  @Column({ type: 'boolean', default: false })
     paid_for: boolean
+
+  @Column({ type: 'boolean', default: false })
+    visited_listing: boolean
 }
 
 export default Booking
