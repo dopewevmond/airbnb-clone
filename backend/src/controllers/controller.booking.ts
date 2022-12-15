@@ -6,19 +6,12 @@ import AppDataSource from '../datasource'
 import Listing from '../entities/entity.listing'
 import User from '../entities/entity.user'
 import validateInputs from '../middleware/middleware.validate'
-import { BookingSchema } from '../schema/schema.booking'
 import Booking from '../entities/entity.booking'
-import doDatesOverlap from '../utils/util.dateoverlap'
+import { doDatesOverlap, getDurationInDays } from '../utils/util.dateoverlap'
 import BadRequestException from '../exceptions/exception.badrequest'
-
-// checking availability of listing for a specified period
-// book a listing
-// edit a listing
-// cancel booking
-
-// for hosts
-// check all bookings
-// cancel bookings
+import HttpException from '../exceptions/exception.http'
+import { AddBookingSchema, CancelBookingSchema, EditBookingSchema } from '../schema/schema.booking'
+import { Not } from 'typeorm'
 
 const listingRepository = AppDataSource.getRepository(Listing)
 const bookingRepository = AppDataSource.getRepository(Booking)
@@ -30,13 +23,17 @@ class BookingController implements Controller {
 
   constructor () {
     this.AddBookingHandler = this.AddBookingHandler.bind(this)
+    this.EditBookingHandler = this.EditBookingHandler.bind(this)
     this.setupRoutes()
   }
 
   private setupRoutes (): void {
     this.router.use(authenticateJWT)
-    this.router.post(`${this.path}/:id`, validateInputs(BookingSchema), tryCatchWrapper(this.AddBookingHandler))
-    // this.router.get(`${this.path}/:id`, validateInputs(BookingAvailabilitySchema), tryCatchWrapper(this.isListingAvailable))
+    this.router.get(`${this.path}/hosting`, tryCatchWrapper(this.GetAllHostedBookings))
+    this.router.get(this.path, tryCatchWrapper(this.GetAllBookings))
+    this.router.post(this.path, validateInputs(AddBookingSchema), tryCatchWrapper(this.AddBookingHandler))
+    this.router.patch(`${this.path}/:bookingId`, validateInputs(EditBookingSchema), tryCatchWrapper(this.EditBookingHandler))
+    this.router.delete(`${this.path}/:bookingId`, validateInputs(CancelBookingSchema), tryCatchWrapper(this.CancelBookingHandler))
   }
 
   /**
@@ -47,15 +44,21 @@ class BookingController implements Controller {
    * Listing is not available if the duration (`preferredEndDate` - `preferredStartDate`) is less than the listing's minNightsStay column in the database.
    *
    * Listing is not available if the duration for which availability is being checked overlaps with a previous booking for the same listing.
+   *
    * @param id Id of listing to check availability for
    * @param preferredStartDate ISO Date string of start date
    * @param preferredEndDate ISO Date string of end date
    * @returns `true` if the listing is available, `false` otherwise
    */
-  private async isListingAvailable (id: number, preferredStartDate: string, preferredEndDate: string): Promise<boolean> {
-    const listing = await listingRepository.findOneOrFail({ where: { id }, relations: { bookings: true } })
+  private async isListingAvailable (id: number, preferredStartDate: string, preferredEndDate: string, excludeBooking = false, bookingId = 0): Promise<boolean> {
+    let listing: Listing
+    if (excludeBooking && bookingId !== 0) {
+      listing = await listingRepository.findOneOrFail({ where: { id, bookings: { id: Not(bookingId) } }, relations: { bookings: true } })
+    } else {
+      listing = await listingRepository.findOneOrFail({ where: { id }, relations: { bookings: true } })
+    }
     const isAcceptingBookings = listing.is_accepting_bookings
-    const durationInDays = Math.floor((new Date(preferredEndDate).getTime() - new Date(preferredStartDate).getTime()) / (1000 * 3600 * 24))
+    const durationInDays = getDurationInDays(preferredStartDate, preferredEndDate)
     const overlap = listing.bookings
       .filter((booking) => doDatesOverlap(booking.start_date.toISOString(), booking.end_date.toISOString(), preferredStartDate, preferredEndDate))
     if (!isAcceptingBookings || durationInDays < listing.min_nights_stay || overlap.length > 0) {
@@ -65,18 +68,17 @@ class BookingController implements Controller {
   }
 
   private async AddBookingHandler (req: Request, res: Response, next: NextFunction): Promise<void> {
-    const { id } = req.params
-    const { startDate, endDate } = req.body
-    const isAvailable = await this.isListingAvailable(parseInt(id), startDate, endDate)
-    if (!isAvailable) {
-      return next(new BadRequestException('the listing is not available at this time'))
-    }
-    const listing = await listingRepository.findOneOrFail({ where: { id: parseInt(id) }, relations: { owner: true } })
+    const { listingId, startDate, endDate } = req.body
+    const listing = await listingRepository.findOneOrFail({ where: { id: parseInt(listingId) }, relations: { owner: true } })
     const user = await userRepository.findOneOrFail({ where: { email_address: res.locals.user?.email } })
     if (listing.owner.id === user.id) {
       return next(new BadRequestException('you cannot book your own listing'))
     }
-    const durationInDays = Math.floor((new Date(endDate).getTime() - new Date(startDate).getTime()) / (1000 * 3600 * 24))
+    const isAvailable = await this.isListingAvailable(parseInt(listingId), startDate, endDate)
+    if (!isAvailable) {
+      return next(new BadRequestException('the listing is not available at this time'))
+    }
+    const durationInDays = getDurationInDays(startDate, endDate)
     const booking = bookingRepository.create({
       listing,
       owner: user,
@@ -88,6 +90,63 @@ class BookingController implements Controller {
     })
     const { id: bookingId } = await bookingRepository.save(booking)
     res.status(201).json({ message: 'booking created successfully', id: bookingId })
+  }
+
+  private async EditBookingHandler (req: Request, res: Response, next: NextFunction): Promise<void> {
+    const { bookingId } = req.params
+    const { newStartDate, newEndDate } = req.body
+    const booking = await bookingRepository.findOneOrFail({ where: { id: parseInt(bookingId) }, relations: { owner: true, listing: true } })
+    const currentUser = await userRepository.findOneOrFail({ where: { email_address: res.locals.user?.email } })
+    if (booking.owner.id !== currentUser.id) {
+      return next(new HttpException(403, 'You cannot edit a booking which does not belong to you'))
+    }
+    if (booking.paid_for) {
+      return next(new BadRequestException('you cannot edit a listing which you have already paid for'))
+    }
+    const newBookAvailable = await this.isListingAvailable(booking.listing.id, newStartDate, newEndDate, true, parseInt(bookingId))
+    if (!newBookAvailable) {
+      return next(new BadRequestException('the listing is not available at these selected times'))
+    }
+    booking.start_date = newStartDate
+    booking.end_date = newEndDate
+    booking.total_amount = getDurationInDays(newStartDate, newEndDate) * booking.listing.night_rate
+    await bookingRepository.save(booking)
+    res.json({ message: 'booking edited successfully', id: bookingId })
+  }
+
+  private async CancelBookingHandler (req: Request, res: Response, next: NextFunction): Promise<void> {
+    const { bookingId } = req.params
+    const booking = await bookingRepository
+      .findOneOrFail({
+        where:
+      { id: parseInt(bookingId), owner: { email_address: res.locals.user?.email } }
+      })
+    if (booking.paid_for) {
+      return next(new BadRequestException('you cannot cancel a booking which you have paid for'))
+    }
+    await bookingRepository.remove(booking)
+    res.json({ message: 'deleted successfully' })
+  }
+
+  private async GetAllBookings (req: Request, res: Response, next: NextFunction): Promise<void> {
+    const bookings = await bookingRepository
+      .find({
+        where:
+      { owner: { email_address: res.locals.user?.email } },
+        order: { start_date: 'DESC' }
+      })
+    res.json({ bookings })
+  }
+
+  private async GetAllHostedBookings (req: Request, res: Response, next: NextFunction): Promise<void> {
+    const bookings = await bookingRepository
+      .find({
+        where:
+      { listing: { owner: { email_address: res.locals.user?.email } } },
+        relations: { owner: true },
+        order: { start_date: 'DESC' }
+      })
+    res.json({ bookings })
   }
 }
 

@@ -1,4 +1,4 @@
-const doDatesOverlap = (start1: string, end1: string, start2: string, end2: string): boolean => {
+export const doDatesOverlap = (start1: string, end1: string, start2: string, end2: string): boolean => {
   const startDate1 = new Date(start1).getTime()
   const endDate1 = new Date(end1).getTime()
   const startDate2 = new Date(start2).getTime()
@@ -10,4 +10,6 @@ const doDatesOverlap = (start1: string, end1: string, start2: string, end2: stri
   return dateOneInDateTwoRange || dateTwoInDateOneRange
 }
 
-export default doDatesOverlap
+export const getDurationInDays = (startDate: string, endDate: string): number => {
+  return Math.floor((new Date(endDate).getTime() - new Date(startDate).getTime()) / (1000 * 3600 * 24))
+}
