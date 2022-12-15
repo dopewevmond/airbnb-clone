@@ -10,7 +10,7 @@ import Booking from '../entities/entity.booking'
 import { doDatesOverlap, getDurationInDays } from '../utils/util.dateoverlap'
 import BadRequestException from '../exceptions/exception.badrequest'
 import HttpException from '../exceptions/exception.http'
-import { AddBookingSchema, CancelBookingSchema, EditBookingSchema } from '../schema/schema.booking'
+import { AddBookingSchema, AdmitVisitorSchema, CancelBookingSchema, EditBookingSchema } from '../schema/schema.booking'
 import { Not } from 'typeorm'
 
 const listingRepository = AppDataSource.getRepository(Listing)
@@ -33,6 +33,7 @@ class BookingController implements Controller {
     this.router.get(this.path, tryCatchWrapper(this.GetAllBookings))
     this.router.post(this.path, validateInputs(AddBookingSchema), tryCatchWrapper(this.AddBookingHandler))
     this.router.patch(`${this.path}/:bookingId`, validateInputs(EditBookingSchema), tryCatchWrapper(this.EditBookingHandler))
+    this.router.patch(`${this.path}/:bookingId/admit`, validateInputs(AdmitVisitorSchema), tryCatchWrapper(this.AdmitVisitor))
     this.router.delete(`${this.path}/:bookingId`, validateInputs(CancelBookingSchema), tryCatchWrapper(this.CancelBookingHandler))
   }
 
@@ -65,6 +66,16 @@ class BookingController implements Controller {
       return false
     }
     return true
+  }
+
+  private async AdmitVisitor (req: Request, res: Response, next: NextFunction): Promise<void> {
+    const { id } = req.params
+    const { visitedListing } = req.body
+    const booking = await bookingRepository
+      .findOneOrFail({ where: { id: parseInt(id), listing: { owner: { email_address: res.locals.user?.email } } } })
+    booking.visited_listing = visitedListing.toLowerCase() === 'true' || visitedListing === true
+    await bookingRepository.save(booking)
+    res.json({ message: 'admitted visitor successfully' })
   }
 
   private async AddBookingHandler (req: Request, res: Response, next: NextFunction): Promise<void> {
