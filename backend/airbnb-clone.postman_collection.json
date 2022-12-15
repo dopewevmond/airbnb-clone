@@ -1,0 +1,765 @@
+{
+	"info": {
+		"_postman_id": "093b418c-55fc-4561-b9d6-d3837edac900",
+		"name": "Airbnb-clone",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "14952299"
+	},
+	"item": [
+		{
+			"name": "Authentication",
+			"item": [
+				{
+					"name": "Signup",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"email\": \"jane@abc.com\",\r\n    \"password\": \"asdfghjkl\",\r\n    \"firstName\": \"Jane\",\r\n    \"lastName\": \"Doe\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/auth/signup",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"auth",
+								"signup"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Login",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const jsonData = pm.response.json()\r",
+									"pm.test(\"Successful POST request\", function () {\r",
+									"    pm.environment.set(\"authToken\", jsonData.accessToken);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"email\": \"john@abc.com\",\r\n    \"password\": \"asdfghjkl\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/auth/login",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"auth",
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Refresh token",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"token\": \"\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/auth/refresh-token",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"auth",
+								"refresh-token"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Request password reset",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"email\": \"\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/auth/reset-request",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"auth",
+								"reset-request"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Password reset",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"token\": \"\",\r\n    \"newPassword\": \"\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/auth/reset",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"auth",
+								"reset"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Logout",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const jsonData = pm.response.json()\r",
+									"pm.test(\"Successful POST request\", function () {\r",
+									"    pm.environment.unset(\"authToken\");\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/auth/logout",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"auth",
+								"logout"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "User API",
+			"item": [
+				{
+					"name": "User details",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/users/profile/6",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"users",
+								"profile",
+								"6"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Edit profile",
+					"request": {
+						"method": "PATCH",
+						"header": []
+					},
+					"response": []
+				},
+				{
+					"name": "Nullify fields",
+					"request": {
+						"method": "PATCH",
+						"header": []
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Listing API",
+			"item": [
+				{
+					"name": "Get listings",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/listings",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"listings"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create listing",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{authToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"Mirage\",\r\n    \"description\": \"ran afknklasd asklfkladf a\",\r\n    \"isAcceptingBookings\": \"true\",\r\n    \"address\": \"airport res\",\r\n    \"street\": \"senchi\",\r\n    \"city\": \"accra\",\r\n    \"state\": \"greater accra\",\r\n    \"country\": \"ghana\",\r\n    \"region\": \"africa\",\r\n    \"listingType\": \"flat/apartment\",\r\n    \"isFullyPrivate\":\"true\",\r\n    \"minNightsStay\": \"5\",\r\n    \"numBathrooms\": \"2\",\r\n    \"maxNumGuests\": \"2\",\r\n    \"nightlyRate\": \"5000\",\r\n    \"timeCheckIn\": \"14:00\",\r\n    \"timeCheckOut\": \"12:00\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/listings",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"listings"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Edit listing",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{url}}/listings/2",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"listings",
+								"2"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete listing",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/listings/9",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"listings",
+								"9"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Add Image to Listing",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "listingImage",
+									"type": "file",
+									"src": "/C:/Users/wevs/Downloads/Telegram Desktop/photo_2022-12-08_14-48-15.jpg"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{url}}/listings/2/images",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"listings",
+								"2",
+								"images"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Add Amenity",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/listings/2/amenities",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"listings",
+								"2",
+								"amenities"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Add room to listing",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"Balcony\",\r\n    \"numKingSizeBeds\": 0,\r\n    \"numQueenSizeBeds\": 0,\r\n    \"numSingleBeds\": 1,\r\n    \"numDoubleBeds\": 0\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/listings/4/rooms",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"listings",
+								"4",
+								"rooms"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Booking API",
+			"item": [
+				{
+					"name": "Get bookings",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/bookings",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"bookings"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get hostings",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/bookings/hosting",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"bookings",
+								"hosting"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Edit a booking",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"newStartDate\": \"2022-12-13T21:25:02.798Z\",\r\n    \"newEndDate\": \"2022-12-25T21:25:28.006Z\"\r\n}\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/bookings/4",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"bookings",
+								"4"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Add a booking",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"listingId\": \"9\",\r\n    \"endDate\": \"2022-12-20T21:25:28.006Z\",\r\n    \"startDate\": \"2022-12-15T21:25:02.798Z\"\r\n}\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/bookings",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"bookings"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Cancel booking",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/bookings/4",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"bookings",
+								"4"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Admit visitor",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"visitedListing\": \"true\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/bookings/",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"bookings",
+								""
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Review API",
+			"item": [
+				{
+					"name": "Get Host Reviews",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"hostId\": \"5\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/reviews/hosts",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"reviews",
+								"hosts"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Add Host Review",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"hostId\": \"5\",\r\n    \"comment\": \"was a very good host\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/reviews/hosts",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"reviews",
+								"hosts"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Reply Host review",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"reply\": \"thank you very much. it was a pleasure hosting you\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/reviews/hosts/1",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"reviews",
+								"hosts",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Listing Reviews",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"listingId\": \"9\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/reviews/listings",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"reviews",
+								"listings"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Add Listing Review",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"listingId\": \"9\",\r\n    \"comment\": \"the place was very neat and the environment was serene\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/reviews/listings",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"reviews",
+								"listings"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Reply listing review",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"reply\": \"it was a pleasure to host you\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/reviews/listings/1",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"reviews",
+								"listings",
+								"1"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "{{authToken}}",
+				"type": "string"
+			}
+		]
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	]
+}
