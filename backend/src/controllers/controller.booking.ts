@@ -72,7 +72,7 @@ class BookingController implements Controller {
     const { id } = req.params
     const { visitedListing } = req.body
     const booking = await bookingRepository
-      .findOneOrFail({ where: { id: parseInt(id), listing: { owner: { email_address: res.locals.user?.email } } } })
+      .findOneOrFail({ where: { id: parseInt(id), listing: { owner: { email_address: res.locals.user?.email } }, paid_for: true } })
     booking.visited_listing = visitedListing.toLowerCase() === 'true' || visitedListing === true
     await bookingRepository.save(booking)
     res.json({ message: 'admitted visitor successfully' })
