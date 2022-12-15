@@ -1,5 +1,6 @@
 import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm'
 import Booking from './entity.booking'
+import HostReview from './entity.hostreview'
 import Listing from './entity.listing'
 import ListingReview from './entity.listingreview'
 
@@ -16,6 +17,12 @@ class User {
 
   @OneToMany(() => Listing, (listing) => listing.owner)
     listings: Listing[]
+
+  @OneToMany(() => HostReview, (review) => review.host)
+    received_reviews: HostReview[]
+
+  @OneToMany(() => HostReview, (review) => review.visitor)
+    given_reviews: HostReview[]
 
   @OneToMany(() => Booking, (booking) => booking.owner)
     bookings: Booking[]
