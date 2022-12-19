@@ -17,6 +17,7 @@ import Amenity from '../entities/entity.amenity'
 import Room from '../entities/entity.room'
 import validateInputs from '../middleware/middleware.validate'
 import { AmenitySchema, IdSchema, ListingSchema, RoomSchema } from '../schema/schema.listing'
+import checkHost from '../middleware/middleware.checkhost'
 
 const listingRepository = AppDataSource.getRepository(Listing)
 const userRepository = AppDataSource.getRepository(User)
@@ -35,6 +36,7 @@ class ListingController implements Controller {
 
   private setupRoutes (): void {
     this.router.use(authenticateJWT)
+    this.router.use(checkHost)
     this.router.get(this.path, tryCatchWrapper(this.GetListings))
     this.router.post(this.path, validateInputs(ListingSchema), tryCatchWrapper(this.AddListing))
     this.router.patch(`${this.path}/:id`, validateInputs(ListingSchema), tryCatchWrapper(this.EditListing))

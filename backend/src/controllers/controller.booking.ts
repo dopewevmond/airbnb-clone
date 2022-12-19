@@ -6,6 +6,7 @@ import AppDataSource from '../datasource'
 import Listing from '../entities/entity.listing'
 import User from '../entities/entity.user'
 import validateInputs from '../middleware/middleware.validate'
+import checkHost from '../middleware/middleware.checkhost'
 import Booking from '../entities/entity.booking'
 import { doDatesOverlap, getDurationInDays } from '../utils/util.dateoverlap'
 import BadRequestException from '../exceptions/exception.badrequest'
@@ -29,11 +30,11 @@ class BookingController implements Controller {
 
   private setupRoutes (): void {
     this.router.use(authenticateJWT)
-    this.router.get(`${this.path}/hosting`, tryCatchWrapper(this.GetAllHostedBookings))
+    this.router.get(`${this.path}/hosting`, checkHost, tryCatchWrapper(this.GetAllHostedBookings))
     this.router.get(this.path, tryCatchWrapper(this.GetAllBookings))
     this.router.post(this.path, validateInputs(AddBookingSchema), tryCatchWrapper(this.AddBookingHandler))
     this.router.patch(`${this.path}/:bookingId`, validateInputs(EditBookingSchema), tryCatchWrapper(this.EditBookingHandler))
-    this.router.patch(`${this.path}/:bookingId/admit`, validateInputs(AdmitVisitorSchema), tryCatchWrapper(this.AdmitVisitor))
+    this.router.patch(`${this.path}/:bookingId/admit`, checkHost, validateInputs(AdmitVisitorSchema), tryCatchWrapper(this.AdmitVisitor))
     this.router.delete(`${this.path}/:bookingId`, validateInputs(CancelBookingSchema), tryCatchWrapper(this.CancelBookingHandler))
   }
 

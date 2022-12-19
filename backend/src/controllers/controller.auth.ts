@@ -46,7 +46,7 @@ class AuthController implements Controller {
 
   private async LoginHandler (req: Request, res: Response, next: NextFunction): Promise<void> {
     const { email, password } = req.body
-    const user = await userRepository.findOne({ where: { email_address: email }, select: ['email_address', 'password_hash', 'is_super_host', 'has_verified_email'] })
+    const user = await userRepository.findOne({ where: { email_address: email }, select: ['email_address', 'password_hash', 'user_role'] })
     if (user == null) {
       return next(new WrongCredentialsException())
     }
