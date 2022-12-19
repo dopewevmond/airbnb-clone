@@ -1,9 +1,4 @@
-import axios from "axios";
 import { withFormik, FormikProps, FormikErrors, Form, Field } from "formik";
-import { ToastContainer, toast } from "react-toastify";
-import Hoc from "../components/Hoc";
-import { setTokens } from "../helpers/helper.user";
-import SignupPage from "./SignupPage";
 
 interface FormValues {
   email: string;
@@ -70,19 +65,10 @@ const InnerForm = (props: FormikProps<FormValues>) => {
   );
 };
 
-interface MyFormProps {
-  email?: string;
-}
-
-type LoginResponse = {
-  accessToken: string;
-  refreshToken: string;
-};
-
-const MyForm = withFormik<MyFormProps, FormValues>({
+const MyForm = withFormik<{}, FormValues>({
   mapPropsToValues: (props) => {
     return {
-      email: props.email || "",
+      email: "",
       password: "",
     };
   },
@@ -98,27 +84,8 @@ const MyForm = withFormik<MyFormProps, FormValues>({
     }
     return errors;
   },
-  handleSubmit: async (values) => {
-    try {
-      const { data } = await axios.post<LoginResponse>(
-        "http://127.0.0.1:5000/auth/login",
-        {
-          email: values.email,
-          password: values.password,
-        },
-        {
-          headers: {
-            "Content-type": "application/json",
-          },
-        }
-      );
-      toast.success("logged in successfully");
-      setTokens(data.accessToken, data.refreshToken);
-    } catch (err: any) {
-      toast.error(
-        err.response?.data?.message || "An error occurred while logging in"
-      );
-    }
+  handleSubmit: (values) => {
+    console.log(values)
   },
 })(InnerForm);
 
@@ -127,11 +94,6 @@ const LoginPage = () => {
     <div className="container">
       <div className="row">        
         <div className="col offset-md-2 col-md-8 offset-lg-3 col-lg-6">
-          <ToastContainer
-            position="top-center"
-            autoClose={5000}
-            hideProgressBar={false}
-          />
           <div className="border my-5 px-5 pb-3 pt-0 rounded">
             <div className="border-bottom py-2">
               <p className="text-bold text-center m-0">Log in</p>
