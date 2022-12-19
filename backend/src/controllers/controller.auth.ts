@@ -57,8 +57,8 @@ class AuthController implements Controller {
     const tokenId = makeid(128)
     const redisPrefix: IRedisPrefix = 'refreshToken-'
     await redisClient.set(redisPrefix + tokenId, 'exists', { EX: parseInt(REFRESH_TOKEN_EXPIRY_TIME) })
-    const accessToken = signAccessToken(user.email_address, user.is_super_host, user.has_verified_email, tokenId)
-    const refreshToken = signRefreshToken(user.email_address, user.is_super_host, user.has_verified_email, tokenId)
+    const accessToken = signAccessToken(user.email_address, user.user_role, tokenId)
+    const refreshToken = signRefreshToken(user.email_address, user.user_role, tokenId)
     res.json({ accessToken, refreshToken })
   }
 
@@ -138,8 +138,8 @@ class AuthController implements Controller {
       return next(new HttpException(401, 'invalid refresh token'))
     }
     const newTokenId = makeid(128)
-    const accessToken = signAccessToken(user.email, user.is_super_host, user.has_verified_email, newTokenId)
-    const refreshToken = signRefreshToken(user.email, user.is_super_host, user.has_verified_email, newTokenId)
+    const accessToken = signAccessToken(user.email, user.role, newTokenId)
+    const refreshToken = signRefreshToken(user.email, user.role, newTokenId)
     // invalidate the previous refresh token since it has been used
     await redisClient.del(redisPrefix + oldRefreshTokenId)
     await redisClient.set(redisPrefix + newTokenId, 'exists', { EX: parseInt(REFRESH_TOKEN_EXPIRY_TIME) })

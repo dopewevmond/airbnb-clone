@@ -6,6 +6,8 @@ import ListingReview from './entity.listingreview'
 
 export type LanguageType = 'english' | 'french' | 'spanish'
 export const languages = ['english', 'french', 'spanish']
+export type UserRoleType = 'host' | 'visitor'
+export const userRoles = ['host', 'visitor']
 
 @Entity('users')
 class User {
@@ -38,6 +40,9 @@ class User {
 
   @Column('varchar', { length: 100, select: false })
     password_hash: string
+
+  @Column({ type: 'enum', enum: userRoles, default: 'visitor' })
+    user_role: UserRoleType
 
   @Column('varchar', { length: 12, nullable: true, select: false })
     phone_number: string | null
