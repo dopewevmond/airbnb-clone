@@ -12,38 +12,7 @@ dotenv.config()
 
 // making sure all needed environment variables are defined
 const PORT = process.env.PORT ?? 3000
-
-const SECRET = process.env.SECRET
-const REFRESH_SECRET = process.env.REFRESH_SECRET
-const DB_HOST = process.env.DB_HOST
-const DB_PORT = process.env.DB_PORT
-const DB_USERNAME = process.env.DB_USERNAME
-const DB_PASSWORD = process.env.DB_PASSWORD
-const DB_NAME = process.env.DB_NAME
-const ACCESS_TOKEN_EXPIRY_TIME = process.env.ACCESS_TOKEN_EXPIRY_TIME
-const REFRESH_TOKEN_EXPIRY_TIME = process.env.REFRESH_TOKEN_EXPIRY_TIME
-const RESET_TOKEN_EXPIRY_TIME = process.env.RESET_TOKEN_EXPIRY_TIME
-const REDIS_URI = process.env.REDIS_URI
 const SENTRY_DSN = process.env.SENTRY_DSN
-
-;[
-  SECRET,
-  REFRESH_SECRET,
-  DB_HOST,
-  DB_PORT,
-  DB_USERNAME,
-  DB_PASSWORD,
-  DB_NAME,
-  ACCESS_TOKEN_EXPIRY_TIME,
-  REFRESH_TOKEN_EXPIRY_TIME,
-  RESET_TOKEN_EXPIRY_TIME,
-  REDIS_URI,
-  SENTRY_DSN
-].forEach((envVar) => {
-  if (typeof envVar === 'undefined' || envVar === '') {
-    throw new Error('Undefined environment variables...')
-  }
-})
 
 class App {
   public app: express.Application
