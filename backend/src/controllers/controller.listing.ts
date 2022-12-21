@@ -36,14 +36,13 @@ class ListingController implements Controller {
 
   private setupRoutes (): void {
     this.router.use(authenticateJWT)
-    this.router.use(checkHost)
-    this.router.get(this.path, tryCatchWrapper(this.GetListings))
-    this.router.post(this.path, validateInputs(ListingSchema), tryCatchWrapper(this.AddListing))
-    this.router.patch(`${this.path}/:id`, validateInputs(ListingSchema), tryCatchWrapper(this.EditListing))
-    this.router.delete(`${this.path}/:id`, validateInputs(IdSchema), tryCatchWrapper(this.DeleteListing))
-    this.router.post(`${this.path}/:id/images`, validateInputs(IdSchema), multer({ storage: multer.memoryStorage() }).single('listingImage'), tryCatchWrapper(this.AddImageToListing))
-    this.router.post(`${this.path}/:id/amenities`, validateInputs(AmenitySchema), tryCatchWrapper(this.AddAmenityToListing))
-    this.router.post(`${this.path}/:id/rooms`, validateInputs(RoomSchema), tryCatchWrapper(this.AddRoomToListing))
+    this.router.get(this.path, checkHost, tryCatchWrapper(this.GetListings))
+    this.router.post(this.path, checkHost, validateInputs(ListingSchema), tryCatchWrapper(this.AddListing))
+    this.router.patch(`${this.path}/:id`, checkHost, validateInputs(ListingSchema), tryCatchWrapper(this.EditListing))
+    this.router.delete(`${this.path}/:id`, checkHost, validateInputs(IdSchema), tryCatchWrapper(this.DeleteListing))
+    this.router.post(`${this.path}/:id/images`, checkHost, validateInputs(IdSchema), multer({ storage: multer.memoryStorage() }).single('listingImage'), tryCatchWrapper(this.AddImageToListing))
+    this.router.post(`${this.path}/:id/amenities`, checkHost, validateInputs(AmenitySchema), tryCatchWrapper(this.AddAmenityToListing))
+    this.router.post(`${this.path}/:id/rooms`, checkHost, validateInputs(RoomSchema), tryCatchWrapper(this.AddRoomToListing))
   }
 
   private async GetListings (req: Request, res: Response, next: NextFunction): Promise<void> {

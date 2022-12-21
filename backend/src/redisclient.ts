@@ -2,7 +2,9 @@ import * as redis from 'redis'
 
 let redisClient: redis.RedisClientType
 ;(async () => {
-  redisClient = redis.createClient()
+  redisClient = redis.createClient({
+    url: process.env.REDIS_URI as string
+  })
   redisClient.on('error', (error) => {
     console.error(error)
     process.exit()

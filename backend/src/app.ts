@@ -23,8 +23,7 @@ const DB_NAME = process.env.DB_NAME
 const ACCESS_TOKEN_EXPIRY_TIME = process.env.ACCESS_TOKEN_EXPIRY_TIME
 const REFRESH_TOKEN_EXPIRY_TIME = process.env.REFRESH_TOKEN_EXPIRY_TIME
 const RESET_TOKEN_EXPIRY_TIME = process.env.RESET_TOKEN_EXPIRY_TIME
-const REDIS_HOST = process.env.REDIS_HOST
-const REDIS_PORT = process.env.REDIS_PORT
+const REDIS_URI = process.env.REDIS_URI
 const SENTRY_DSN = process.env.SENTRY_DSN
 
 ;[
@@ -38,8 +37,7 @@ const SENTRY_DSN = process.env.SENTRY_DSN
   ACCESS_TOKEN_EXPIRY_TIME,
   REFRESH_TOKEN_EXPIRY_TIME,
   RESET_TOKEN_EXPIRY_TIME,
-  REDIS_HOST,
-  REDIS_PORT,
+  REDIS_URI,
   SENTRY_DSN
 ].forEach((envVar) => {
   if (typeof envVar === 'undefined' || envVar === '') {
