@@ -5,6 +5,8 @@
   "license": "MIT",
   "scripts": {
     "dev": "nodemon ./src/server.ts",
+    "build": "tsc",
+    "start": "node ./dist/server.js",
     "typeorm": "typeorm-ts-node-commonjs"
   },
   "devDependencies": {
