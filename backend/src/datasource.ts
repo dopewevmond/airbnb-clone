@@ -40,6 +40,7 @@ AppDataSource.initialize()
   })
   .catch((error) => {
     console.error(error)
+    process.exit()
   })
 
 export default AppDataSource
