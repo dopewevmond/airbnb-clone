@@ -1,25 +1,23 @@
 import { Formik, Form, Field } from "formik";
-import axios from 'axios'
-import { useNavigate } from 'react-router-dom'
-import * as yup from 'yup'
+import * as yup from "yup";
+import { AuthContext } from "../context/AuthContext";
+import { useContext } from "react";
 
 interface FormValues {
   email: string;
   password: string;
 }
-interface LoginResponse {
-  accessToken: string
-  refreshToken: string
-}
 
 const formValidationSchema = yup.object().shape({
-  email: yup.string()
-    .email('Invalid email address')
-    .required('Email address is required'),
-  password: yup.string()
-    .min(8, 'Password must be more than 8 characters')
-    .required('Password is required')
-})
+  email: yup
+    .string()
+    .email("Invalid email address")
+    .required("Email address is required"),
+  password: yup
+    .string()
+    .min(8, "Password must be more than 8 characters")
+    .required("Password is required"),
+});
 
 const initialFormValues: FormValues = {
   email: "",
@@ -27,29 +25,15 @@ const initialFormValues: FormValues = {
 };
 
 const LoginPage = () => {
-  const navigate = useNavigate()
+  const { login, loginError } = useContext(AuthContext);
 
-  const handleSubmit = async ({ email, password }: FormValues, setSubmitting: (isSubmitting: boolean) => void) => {
-    try {
-      const { data } = await axios.post<LoginResponse>(
-        "http://127.0.0.1:5000/auth/login",
-        { email, password },
-        {
-          headers: {
-            "content-type": "application/json",
-          },
-        }
-      );
-      console.log(data.accessToken);
-      console.log(data.refreshToken);
-      setSubmitting(false)
-      navigate('/')
-    } catch (err: any) {
-      console.log(err);
-      setSubmitting(false)
-    }
+  const handleSubmit = (
+    { email, password }: FormValues,
+    setSubmitting: (isSubmitting: boolean) => void
+  ) => {
+    login(email, password)
+    setSubmitting(false)
   };
-
   return (
     <div className="container">
       <div className="row">
@@ -60,6 +44,7 @@ const LoginPage = () => {
             </div>
             <div className="">
               <div className="py-2">
+                <span className="text-danger"> {loginError} </span>
                 <Formik
                   initialValues={initialFormValues}
                   validationSchema={formValidationSchema}
