@@ -1,19 +1,13 @@
 import "bootstrap/dist/css/bootstrap.min.css";
-import LoginPage from "./pages/LoginPage";
-import SignupPage from "./pages/SignupPage";
-import Home from "./components/Home";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter } from "react-router-dom";
 import AuthContextProvider from "./context/AuthContext";
+import Router from "./hooks/Router";
 
 function App() {
   return (
     <BrowserRouter>
       <AuthContextProvider>
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/signup" element={<SignupPage />} />
-        </Routes>
+        <Router />
       </AuthContextProvider>
     </BrowserRouter>
   );

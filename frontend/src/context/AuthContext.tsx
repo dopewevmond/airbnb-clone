@@ -15,16 +15,20 @@ interface Props {
   children?: ReactNode;
 }
 interface IAuthContext extends IUser {
+  loading: boolean;
+  error: string | null;
   login: (email: string, password: string) => void;
-  loginError: string | null;
+  logout: () => void;
 }
 const initialAuthContext: IAuthContext = {
   isLoggedIn: false,
   email: null,
   accessToken: null,
   role: null,
+  loading: true,
+  error: null,
   login: (email: string, password: string) => {},
-  loginError: null
+  logout: () => {}
 };
 
 export const AuthContext = createContext<IAuthContext>(initialAuthContext);
@@ -44,8 +48,9 @@ interface GenericApiResponse {
 
 const AuthContextProvider: FC<Props> = ({ children }) => {
   const navigate = useNavigate();
+  const [loading, setLoading] = useState(true);
   const [email, setEmail] = useState<string | null>(null);
-  const [loginError, setLoginError] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
   const [role, setRole] = useState<string | null>(null);
   const [isLoggedIn, setLoggedIn] = useState(false);
   const [accessToken, setAccessToken] = useState<string | null>(null);
@@ -58,11 +63,13 @@ const AuthContextProvider: FC<Props> = ({ children }) => {
       setAccessToken(jsonUserInfo.accessToken);
       setLoggedIn(true);
     }
+    setLoading(false)
   }, []);
 
   const login = async (email: string, password: string): Promise<void> => {
     try {
-      setLoginError(null)
+      setError(null)
+      setLoading(true)
 
       const data = await axiosClient<LoginApiResponse>(
         "http://127.0.0.1:5000/auth/login",
@@ -74,6 +81,7 @@ const AuthContextProvider: FC<Props> = ({ children }) => {
       setRole(jwtInfo.role);
       setAccessToken(data.accessToken);
       setLoggedIn(true);
+      setLoading(false)
 
       const jsonUserInfo: IUser = {
         isLoggedIn: true,
@@ -86,9 +94,28 @@ const AuthContextProvider: FC<Props> = ({ children }) => {
       navigate('/')
     } catch (err: any) {
       const { response } = err as AxiosError<GenericApiResponse>;
-      setLoginError(response?.data?.message ?? 'An error occurred while logging in')
+      setError(response?.data?.message ?? 'An error occurred while logging in')
     }
   };
+
+  const logout = async () => {
+    try {
+      const data = await axiosClient<GenericApiResponse>(
+        "http://127.0.0.1:5000/auth/logout",
+        {},
+        accessToken as string
+      );
+      console.log(data.message)
+      setEmail(null);
+      setRole(null);
+      setAccessToken(null);
+      setLoggedIn(false);
+      localStorage.removeItem(userInfoKey)
+      localStorage.removeItem(refreshTokenKey)
+    } catch (err) {
+      console.log(err)
+    }
+  }
 
   return (
     <AuthContext.Provider
@@ -97,8 +124,10 @@ const AuthContextProvider: FC<Props> = ({ children }) => {
         role,
         isLoggedIn,
         accessToken,
+        loading,
         login,
-        loginError
+        logout,
+        error
       }}
     >
       {children}

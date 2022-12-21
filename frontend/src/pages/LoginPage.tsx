@@ -25,7 +25,7 @@ const initialFormValues: FormValues = {
 };
 
 const LoginPage = () => {
-  const { login, loginError } = useContext(AuthContext);
+  const { login, error } = useContext(AuthContext);
 
   const handleSubmit = (
     { email, password }: FormValues,
@@ -44,7 +44,7 @@ const LoginPage = () => {
             </div>
             <div className="">
               <div className="py-2">
-                <span className="text-danger"> {loginError} </span>
+                <span className="text-danger"> {error} </span>
                 <Formik
                   initialValues={initialFormValues}
                   validationSchema={formValidationSchema}
