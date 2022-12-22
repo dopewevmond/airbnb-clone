@@ -35,7 +35,7 @@ class ListingController implements Controller {
   }
 
   private setupRoutes (): void {
-    this.router.get(this.path, authenticateJWT, checkHost, tryCatchWrapper(this.GetListings))
+    this.router.get(this.path, authenticateJWT, tryCatchWrapper(this.GetListings))
     this.router.post(this.path, authenticateJWT, checkHost, validateInputs(ListingSchema), tryCatchWrapper(this.AddListing))
     this.router.patch(`${this.path}/:id`, authenticateJWT, checkHost, validateInputs(ListingSchema), tryCatchWrapper(this.EditListing))
     this.router.delete(`${this.path}/:id`, authenticateJWT, checkHost, validateInputs(IdSchema), tryCatchWrapper(this.DeleteListing))
@@ -45,7 +45,7 @@ class ListingController implements Controller {
   }
 
   private async GetListings (req: Request, res: Response, next: NextFunction): Promise<void> {
-    const listings = await listingRepository.find({ relations: { owner: true, photos: { photo: true }, amenities: true } })
+    const listings = await listingRepository.find({ relations: { owner: true, photos: { photo: true }, amenities: true, rooms: true } })
     res.json({ listings })
   }
 

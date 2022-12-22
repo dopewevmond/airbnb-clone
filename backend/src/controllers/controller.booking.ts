@@ -33,7 +33,7 @@ class BookingController implements Controller {
     this.router.get(this.path, authenticateJWT, tryCatchWrapper(this.GetAllBookings))
     this.router.post(this.path, authenticateJWT, validateInputs(AddBookingSchema), tryCatchWrapper(this.AddBookingHandler))
     this.router.patch(`${this.path}/:bookingId`, authenticateJWT, validateInputs(EditBookingSchema), tryCatchWrapper(this.EditBookingHandler))
-    this.router.patch(`${this.path}/:bookingId/admit`, authenticateJWT, checkHost, validateInputs(AdmitVisitorSchema), tryCatchWrapper(this.AdmitVisitor))
+    this.router.patch(`${this.path}/:id/admit`, authenticateJWT, checkHost, validateInputs(AdmitVisitorSchema), tryCatchWrapper(this.AdmitVisitor))
     this.router.delete(`${this.path}/:bookingId`, authenticateJWT, validateInputs(CancelBookingSchema), tryCatchWrapper(this.CancelBookingHandler))
   }
 
@@ -52,27 +52,43 @@ class BookingController implements Controller {
    * @returns `true` if the listing is available, `false` otherwise
    */
   private async isListingAvailable (id: number, preferredStartDate: string, preferredEndDate: string, excludeBooking = false, bookingId = 0): Promise<boolean> {
-    let listing: Listing
+    const listing = await listingRepository.findOneOrFail({ where: { id }, relations: { bookings: true } })
     if (excludeBooking && bookingId !== 0) {
-      listing = await listingRepository.findOneOrFail({ where: { id, bookings: { id: Not(bookingId) } }, relations: { bookings: true } })
+      const listingWithoutBooking = await listingRepository.findOne({ where: { id, bookings: { id: Not(bookingId) } }, relations: { bookings: true } })
+      if (listingWithoutBooking == null) {
+        // means that its the only booking for the listing, we check if the listing is still accepting bookings and the duration
+        if (!listing.is_accepting_bookings || getDurationInDays(preferredStartDate, preferredEndDate) < listing.min_nights_stay) {
+          return false
+        }
+        return true
+      } else {
+        // there are other bookings for the listing
+        const isAcceptingBookings = listingWithoutBooking.is_accepting_bookings
+        const durationInDays = getDurationInDays(preferredStartDate, preferredEndDate)
+        const overlap = listingWithoutBooking.bookings
+          .filter((booking) => doDatesOverlap(booking.start_date.toISOString(), booking.end_date.toISOString(), preferredStartDate, preferredEndDate))
+        if (!isAcceptingBookings || durationInDays < listing.min_nights_stay || overlap.length > 0) {
+          return false
+        }
+        return true
+      }
     } else {
-      listing = await listingRepository.findOneOrFail({ where: { id }, relations: { bookings: true } })
+      const isAcceptingBookings = listing.is_accepting_bookings
+      const durationInDays = getDurationInDays(preferredStartDate, preferredEndDate)
+      const overlap = listing.bookings
+        .filter((booking) => doDatesOverlap(booking.start_date.toISOString(), booking.end_date.toISOString(), preferredStartDate, preferredEndDate))
+      if (!isAcceptingBookings || durationInDays < listing.min_nights_stay || overlap.length > 0) {
+        return false
+      }
+      return true
     }
-    const isAcceptingBookings = listing.is_accepting_bookings
-    const durationInDays = getDurationInDays(preferredStartDate, preferredEndDate)
-    const overlap = listing.bookings
-      .filter((booking) => doDatesOverlap(booking.start_date.toISOString(), booking.end_date.toISOString(), preferredStartDate, preferredEndDate))
-    if (!isAcceptingBookings || durationInDays < listing.min_nights_stay || overlap.length > 0) {
-      return false
-    }
-    return true
   }
 
   private async AdmitVisitor (req: Request, res: Response, next: NextFunction): Promise<void> {
     const { id } = req.params
     const { visitedListing } = req.body
     const booking = await bookingRepository
-      .findOneOrFail({ where: { id: parseInt(id), listing: { owner: { email_address: res.locals.user?.email } }, paid_for: true } })
+      .findOneOrFail({ where: { id: parseInt(id), listing: { owner: { email_address: res.locals.user?.email } } } })
     booking.visited_listing = visitedListing.toLowerCase() === 'true' || visitedListing === true
     await bookingRepository.save(booking)
     res.json({ message: 'admitted visitor successfully' })
@@ -144,6 +160,7 @@ class BookingController implements Controller {
       .find({
         where:
       { owner: { email_address: res.locals.user?.email } },
+        relations: { listing: true },
         order: { start_date: 'DESC' }
       })
     res.json({ bookings })
