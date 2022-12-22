@@ -21,10 +21,9 @@ class UserController implements Controller {
   }
 
   private setupRoutes (): void {
-    this.router.use(authenticateJWT)
-    this.router.get(`${this.path}/profile/:id`, validateInputs(IdSchema), tryCatchWrapper(this.GetProfileInfoHandler))
-    this.router.patch(`${this.path}/profile`, validateInputs(EditProfileSchema), tryCatchWrapper(this.EditProfileHandler))
-    this.router.patch(`${this.path}/profile/nullify-fields`, validateInputs(OptionalProfileSchema), tryCatchWrapper(this.NullifyFieldHandler)
+    this.router.get(`${this.path}/profile/:id`, authenticateJWT, validateInputs(IdSchema), tryCatchWrapper(this.GetProfileInfoHandler))
+    this.router.patch(`${this.path}/profile`, authenticateJWT, validateInputs(EditProfileSchema), tryCatchWrapper(this.EditProfileHandler))
+    this.router.patch(`${this.path}/profile/nullify-fields`, authenticateJWT, validateInputs(OptionalProfileSchema), tryCatchWrapper(this.NullifyFieldHandler)
     )
   }
 

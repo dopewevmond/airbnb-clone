@@ -29,13 +29,12 @@ class BookingController implements Controller {
   }
 
   private setupRoutes (): void {
-    this.router.use(authenticateJWT)
-    this.router.get(`${this.path}/hosting`, checkHost, tryCatchWrapper(this.GetAllHostedBookings))
-    this.router.get(this.path, tryCatchWrapper(this.GetAllBookings))
-    this.router.post(this.path, validateInputs(AddBookingSchema), tryCatchWrapper(this.AddBookingHandler))
-    this.router.patch(`${this.path}/:bookingId`, validateInputs(EditBookingSchema), tryCatchWrapper(this.EditBookingHandler))
-    this.router.patch(`${this.path}/:bookingId/admit`, checkHost, validateInputs(AdmitVisitorSchema), tryCatchWrapper(this.AdmitVisitor))
-    this.router.delete(`${this.path}/:bookingId`, validateInputs(CancelBookingSchema), tryCatchWrapper(this.CancelBookingHandler))
+    this.router.get(`${this.path}/hosting`, authenticateJWT, checkHost, tryCatchWrapper(this.GetAllHostedBookings))
+    this.router.get(this.path, authenticateJWT, tryCatchWrapper(this.GetAllBookings))
+    this.router.post(this.path, authenticateJWT, validateInputs(AddBookingSchema), tryCatchWrapper(this.AddBookingHandler))
+    this.router.patch(`${this.path}/:bookingId`, authenticateJWT, validateInputs(EditBookingSchema), tryCatchWrapper(this.EditBookingHandler))
+    this.router.patch(`${this.path}/:bookingId/admit`, authenticateJWT, checkHost, validateInputs(AdmitVisitorSchema), tryCatchWrapper(this.AdmitVisitor))
+    this.router.delete(`${this.path}/:bookingId`, authenticateJWT, validateInputs(CancelBookingSchema), tryCatchWrapper(this.CancelBookingHandler))
   }
 
   /**

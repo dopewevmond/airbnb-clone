@@ -35,7 +35,7 @@ class User {
   @Column('varchar', { length: 50, select: false })
     last_name: string
 
-  @Column('varchar', { length: 255, unique: true, select: false })
+  @Column('varchar', { length: 255, unique: true })
     email_address: string
 
   @Column('varchar', { length: 100, select: false })

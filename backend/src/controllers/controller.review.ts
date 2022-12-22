@@ -37,16 +37,15 @@ class ReviewController implements Controller {
   }
 
   private setupRoutes (): void {
-    this.router.use(authenticateJWT)
     this.router.route(this.path + '/hosts')
-      .get(validateInputs(GetHostReviewSchema), tryCatchWrapper(this.GetHostReviews))
-      .post(validateInputs(AddHostReviewSchema), tryCatchWrapper(this.AddHostReview))
-    this.router.patch(`${this.path}/hosts/:id`, validateInputs(ReplyHostReviewSchema), tryCatchWrapper(this.ReplyHostReview))
+      .get(authenticateJWT, validateInputs(GetHostReviewSchema), tryCatchWrapper(this.GetHostReviews))
+      .post(authenticateJWT, validateInputs(AddHostReviewSchema), tryCatchWrapper(this.AddHostReview))
+    this.router.patch(`${this.path}/hosts/:id`, authenticateJWT, validateInputs(ReplyHostReviewSchema), tryCatchWrapper(this.ReplyHostReview))
 
     this.router.route(this.path + '/listings')
-      .get(validateInputs(GetListingReviewSchema), tryCatchWrapper(this.GetListingReviews))
-      .post(validateInputs(AddListingReviewSchema), tryCatchWrapper(this.AddListingReview))
-    this.router.patch(`${this.path}/listings/:id`, validateInputs(ReplyHostReviewSchema), tryCatchWrapper(this.ReplyListingReview))
+      .get(authenticateJWT, validateInputs(GetListingReviewSchema), tryCatchWrapper(this.GetListingReviews))
+      .post(authenticateJWT, validateInputs(AddListingReviewSchema), tryCatchWrapper(this.AddListingReview))
+    this.router.patch(`${this.path}/listings/:id`, authenticateJWT, validateInputs(ReplyHostReviewSchema), tryCatchWrapper(this.ReplyListingReview))
   }
 
   private async GetHostReviews (req: Request, res: Response, next: NextFunction): Promise<void> {

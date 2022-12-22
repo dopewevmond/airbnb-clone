@@ -5,22 +5,23 @@ phases:
     runtime-versions:
       nodejs: latest
     commands:
+      - cd backend
       - npm install -g typescript
       - npm install -g yarn
   pre_build:
     commands:
       - echo Installing source NPM dependencies...
-      - cd backend && yarn install
+      - yarn install
   build:
     commands:
       - echo Build started on `date`
-      - cd backend && yarn run build
+      - yarn run build
   post_build:
     commands:
       - echo Build completed on `date`
 artifacts:
   files:
-    - backend/dist/**/*
-    - backend/package.json
-    - backend/yarn.lock
-    - backend/node_modules/**/*
+    - dist/**/*
+    - package.json
+    - yarn.lock
+    - node_modules/**/*

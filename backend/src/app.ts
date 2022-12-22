@@ -23,6 +23,9 @@ class App {
     this.app.use(Sentry.Handlers.requestHandler())
     this.setupRequiredMiddleware()
     controllers.forEach((controller) => {
+      this.app.get('/', (req: express.Request, res: express.Response) => {
+        res.send('Health check. App is working')
+      })
       this.app.use('/', controller.router)
     })
     this.app.use(Sentry.Handlers.errorHandler())

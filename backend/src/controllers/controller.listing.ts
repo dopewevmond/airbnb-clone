@@ -35,19 +35,18 @@ class ListingController implements Controller {
   }
 
   private setupRoutes (): void {
-    this.router.use(authenticateJWT)
-    this.router.get(this.path, checkHost, tryCatchWrapper(this.GetListings))
-    this.router.post(this.path, checkHost, validateInputs(ListingSchema), tryCatchWrapper(this.AddListing))
-    this.router.patch(`${this.path}/:id`, checkHost, validateInputs(ListingSchema), tryCatchWrapper(this.EditListing))
-    this.router.delete(`${this.path}/:id`, checkHost, validateInputs(IdSchema), tryCatchWrapper(this.DeleteListing))
-    this.router.post(`${this.path}/:id/images`, checkHost, validateInputs(IdSchema), multer({ storage: multer.memoryStorage() }).single('listingImage'), tryCatchWrapper(this.AddImageToListing))
-    this.router.post(`${this.path}/:id/amenities`, checkHost, validateInputs(AmenitySchema), tryCatchWrapper(this.AddAmenityToListing))
-    this.router.post(`${this.path}/:id/rooms`, checkHost, validateInputs(RoomSchema), tryCatchWrapper(this.AddRoomToListing))
+    this.router.get(this.path, authenticateJWT, checkHost, tryCatchWrapper(this.GetListings))
+    this.router.post(this.path, authenticateJWT, checkHost, validateInputs(ListingSchema), tryCatchWrapper(this.AddListing))
+    this.router.patch(`${this.path}/:id`, authenticateJWT, checkHost, validateInputs(ListingSchema), tryCatchWrapper(this.EditListing))
+    this.router.delete(`${this.path}/:id`, authenticateJWT, checkHost, validateInputs(IdSchema), tryCatchWrapper(this.DeleteListing))
+    this.router.post(`${this.path}/:id/images`, authenticateJWT, checkHost, validateInputs(IdSchema), multer({ storage: multer.memoryStorage() }).single('listingImage'), tryCatchWrapper(this.AddImageToListing))
+    this.router.post(`${this.path}/:id/amenities`, authenticateJWT, checkHost, validateInputs(AmenitySchema), tryCatchWrapper(this.AddAmenityToListing))
+    this.router.post(`${this.path}/:id/rooms`, authenticateJWT, checkHost, validateInputs(RoomSchema), tryCatchWrapper(this.AddRoomToListing))
   }
 
   private async GetListings (req: Request, res: Response, next: NextFunction): Promise<void> {
     const listings = await listingRepository.find({ relations: { owner: true, photos: { photo: true }, amenities: true } })
-    res.json({ ...listings })
+    res.json({ listings })
   }
 
   private async AddRoomToListing (req: Request, res: Response, next: NextFunction): Promise<void> {
