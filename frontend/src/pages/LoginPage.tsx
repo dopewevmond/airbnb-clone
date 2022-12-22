@@ -2,6 +2,8 @@ import { Formik, Form, Field } from "formik";
 import * as yup from "yup";
 import { AuthContext } from "../context/AuthContext";
 import { useContext } from "react";
+import { Link } from "react-router-dom";
+import Loader from "../components/Loader/Loader";
 
 interface FormValues {
   email: string;
@@ -25,14 +27,14 @@ const initialFormValues: FormValues = {
 };
 
 const LoginPage = () => {
-  const { login, error } = useContext(AuthContext);
+  const { login, error, loading, displayMessage } = useContext(AuthContext);
 
   const handleSubmit = (
     { email, password }: FormValues,
     setSubmitting: (isSubmitting: boolean) => void
   ) => {
-    login(email, password)
-    setSubmitting(false)
+    login(email, password);
+    setSubmitting(false);
   };
   return (
     <div className="container">
@@ -44,7 +46,10 @@ const LoginPage = () => {
             </div>
             <div className="">
               <div className="py-2">
-                <span className="text-danger"> {error} </span>
+                {displayMessage && (
+                  <div className="alert alert-success"> {displayMessage} </div>
+                )}
+                {error && <div className="alert alert-danger"> {error} </div>}
                 <Formik
                   initialValues={initialFormValues}
                   validationSchema={formValidationSchema}
@@ -52,7 +57,7 @@ const LoginPage = () => {
                     handleSubmit(values, setSubmitting);
                   }}
                 >
-                  {({ touched, errors, isSubmitting }) => (
+                  {({ touched, errors }) => (
                     <Form>
                       <div className="pb-4 input-group">
                         <label htmlFor="email" className="form-label">
@@ -101,14 +106,19 @@ const LoginPage = () => {
 
                       <button
                         type="submit"
-                        className="btn btn-danger btn-block w-100"
-                        disabled={isSubmitting}
+                        className="btn btn-danger btn-block w-100 d-flex align-items-center justify-content-center"
+                        disabled={loading}
                       >
-                        Log in
+                        {
+                          loading ? <Loader /> : 'Log in'
+                        }
                       </button>
                     </Form>
                   )}
                 </Formik>
+                <p className="mt-4">
+                  Don&apos;t have an account? <Link to="/signup">Sign up</Link>
+                </p>
               </div>
             </div>
           </div>

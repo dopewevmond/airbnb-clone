@@ -1,17 +1,15 @@
 import { Formik, Form, Field } from "formik";
-import axios from "axios";
-import { useNavigate } from "react-router-dom";
 import * as yup from "yup";
-import { useState } from "react";
+import { useState, useContext } from "react";
+import { AuthContext } from "../context/AuthContext";
+import { Link } from "react-router-dom";
+import Loader from "../components/Loader/Loader";
 
 interface FormValues {
   firstName: string;
   lastName: string;
   email: string;
   password: string;
-}
-interface SignupResponse {
-  message: string;
 }
 
 const formValidationSchema = yup.object().shape({
@@ -36,29 +34,14 @@ const initialFormValues: FormValues = {
 
 const SignupPage = () => {
   const [passwordHidden, setPasswordHidden] = useState(true);
-  const navigate = useNavigate();
+  const { signup, error, loading, displayMessage } = useContext(AuthContext);
 
-  const handleSubmit = async (
+  const handleSubmit = (
     { firstName, lastName, email, password }: FormValues,
     setSubmitting: (isSubmitting: boolean) => void
   ) => {
-    try {
-      const { data } = await axios.post<SignupResponse>(
-        "http://127.0.0.1:5000/auth/signup",
-        { firstName, lastName, email, password },
-        {
-          headers: {
-            "content-type": "application/json",
-          },
-        }
-      );
-      console.log(data.message);
-      setSubmitting(false);
-      navigate("/login");
-    } catch (err: any) {
-      console.log(err);
-      setSubmitting(false);
-    }
+    signup(firstName, lastName, email, password);
+    setSubmitting(false);
   };
 
   return (
@@ -71,6 +54,10 @@ const SignupPage = () => {
             </div>
             <div className="">
               <div className="py-2">
+              {displayMessage && (
+                  <div className="alert alert-success"> {displayMessage} </div>
+                )}
+                {error && <div className="alert alert-danger"> {error} </div>}
                 <Formik
                   initialValues={initialFormValues}
                   validationSchema={formValidationSchema}
@@ -188,14 +175,19 @@ const SignupPage = () => {
 
                       <button
                         type="submit"
-                        className="btn btn-danger btn-block w-100"
-                        disabled={isSubmitting}
+                        className="btn btn-danger btn-block w-100 d-flex align-items-center justify-content-center"
+                        disabled={loading}
                       >
-                        Sign up
+                        {
+                          loading ? <Loader /> : 'Sign up'
+                        }
                       </button>
                     </Form>
                   )}
                 </Formik>
+                <p className="mt-4">
+                  Already have an account? <Link to="/login">Log in</Link>
+                </p>
               </div>
             </div>
           </div>

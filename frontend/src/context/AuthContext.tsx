@@ -1,6 +1,6 @@
 import { FC, createContext, useState, useEffect, ReactNode } from "react";
 import { axiosClient } from "../utils/axiosclient";
-import { userInfoKey, refreshTokenKey } from "../utils/constants";
+import { userInfoKey, refreshTokenKey, BASE_URL } from "../utils/constants";
 import jwtDecode from "jwt-decode";
 import { useNavigate } from "react-router-dom";
 import { AxiosError } from "axios";
@@ -17,18 +17,32 @@ interface Props {
 interface IAuthContext extends IUser {
   loading: boolean;
   error: string | null;
+  displayMessage: string | null;
   login: (email: string, password: string) => void;
+  signup: (
+    firstName: string,
+    lastName: string,
+    email: string,
+    password: string
+  ) => void;
   logout: () => void;
 }
 const initialAuthContext: IAuthContext = {
   isLoggedIn: false,
+  displayMessage: null,
   email: null,
   accessToken: null,
   role: null,
   loading: true,
   error: null,
   login: (email: string, password: string) => {},
-  logout: () => {}
+  signup: (
+    firstName: string,
+    lastName: string,
+    email: string,
+    password: string
+  ) => {},
+  logout: () => {},
 };
 
 export const AuthContext = createContext<IAuthContext>(initialAuthContext);
@@ -43,12 +57,13 @@ interface IDecodedJWT {
   token_id: string;
 }
 interface GenericApiResponse {
-  message? : string
+  message?: string;
 }
 
 const AuthContextProvider: FC<Props> = ({ children }) => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
+  const [displayMessage, setDisplayMessage] = useState<string | null>(null);
   const [email, setEmail] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [role, setRole] = useState<string | null>(null);
@@ -63,25 +78,27 @@ const AuthContextProvider: FC<Props> = ({ children }) => {
       setAccessToken(jsonUserInfo.accessToken);
       setLoggedIn(true);
     }
-    setLoading(false)
+    setLoading(false);
   }, []);
 
   const login = async (email: string, password: string): Promise<void> => {
+    setLoading(true);
+    setError(null);
+    setDisplayMessage(null);
+    setEmail(null);
+    setRole(null);
+    setAccessToken(null);
+    setLoggedIn(false);
     try {
-      setError(null)
-      setLoading(true)
-
       const data = await axiosClient<LoginApiResponse>(
-        "http://127.0.0.1:5000/auth/login",
+        `${BASE_URL}/auth/login`,
         { email, password }
       );
       const jwtInfo = jwtDecode(data.accessToken) as IDecodedJWT;
-
       setEmail(jwtInfo.email);
       setRole(jwtInfo.role);
       setAccessToken(data.accessToken);
       setLoggedIn(true);
-      setLoading(false)
 
       const jsonUserInfo: IUser = {
         isLoggedIn: true,
@@ -90,32 +107,68 @@ const AuthContextProvider: FC<Props> = ({ children }) => {
         accessToken: data.accessToken,
       };
       localStorage.setItem(userInfoKey, JSON.stringify(jsonUserInfo));
-      localStorage.setItem(refreshTokenKey, JSON.stringify(data.refreshToken))
-      navigate('/')
+      localStorage.setItem(refreshTokenKey, JSON.stringify(data.refreshToken));
+      setLoading(false);
+      navigate("/");
     } catch (err: any) {
       const { response } = err as AxiosError<GenericApiResponse>;
-      setError(response?.data?.message ?? 'An error occurred while logging in')
+      setError(response?.data?.message ?? "An error occurred while logging in");
+      setLoading(false);
     }
   };
 
   const logout = async () => {
+    setLoading(true);
+    setError(null);
+    setDisplayMessage(null);
+    setEmail(null);
+    setRole(null);
+    setLoggedIn(false);
     try {
-      const data = await axiosClient<GenericApiResponse>(
-        "http://127.0.0.1:5000/auth/logout",
+      await axiosClient<GenericApiResponse>(
+        `${BASE_URL}/auth/logout`,
         {},
         accessToken as string
       );
-      console.log(data.message)
-      setEmail(null);
-      setRole(null);
-      setAccessToken(null);
-      setLoggedIn(false);
-      localStorage.removeItem(userInfoKey)
-      localStorage.removeItem(refreshTokenKey)
+      localStorage.removeItem(userInfoKey);
+      localStorage.removeItem(refreshTokenKey);
+      setLoading(false);
     } catch (err) {
-      console.log(err)
+      const { response } = err as AxiosError<GenericApiResponse>;
+      setLoading(false);
+      setError(
+        response?.data?.message ?? "An error occurred while logging out"
+      );
     }
-  }
+  };
+
+  const signup = async (
+    firstName: string,
+    lastName: string,
+    email: string,
+    password: string
+  ) => {
+    setLoading(true);
+    setError(null);
+    setDisplayMessage(null);
+    setEmail(null);
+    setRole(null);
+    setAccessToken(null);
+    setLoggedIn(false);
+    try {
+      const data = await axiosClient<GenericApiResponse>(
+        `${BASE_URL}/auth/signup`,
+        { firstName, lastName, email, password }
+      );
+      setLoading(false);
+      setDisplayMessage(data.message ?? "The user was created successfully");
+      navigate("/login");
+    } catch (err: any) {
+      const { response } = err as AxiosError<GenericApiResponse>;
+      setLoading(false);
+      setError(response?.data?.message ?? "An error occurred while signing up");
+    }
+  };
 
   return (
     <AuthContext.Provider
@@ -125,9 +178,11 @@ const AuthContextProvider: FC<Props> = ({ children }) => {
         isLoggedIn,
         accessToken,
         loading,
+        displayMessage,
         login,
+        signup,
         logout,
-        error
+        error,
       }}
     >
       {children}
