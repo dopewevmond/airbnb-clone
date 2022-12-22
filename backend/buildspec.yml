@@ -1,0 +1,26 @@
+version: 0.2
+
+phases:
+  install:
+    runtime-versions:
+      nodejs: 10
+    commands:
+      - npm install -g typescript
+      - npm install -g yarn
+  pre_build:
+    commands:
+      - echo Installing source NPM dependencies...
+      - cd backend && yarn install
+  build:
+    commands:
+      - echo Build started on `date`
+      - cd backend && yarn run build
+  post_build:
+    commands:
+      - echo Build completed on `date`
+artifacts:
+  files:
+    - backend/dist/**/*
+    - backend/package.json
+    - backend/yarn.lock
+    - backend/node_modules/**/*
