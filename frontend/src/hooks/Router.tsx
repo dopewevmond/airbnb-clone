@@ -4,6 +4,8 @@ import Home from "../components/Home";
 import LoginPage from "../pages/LoginPage";
 import SignupPage from "../pages/SignupPage";
 import OtherComponent from "../components/OtherComponent";
+import HostGuard from "../pages/HostGuard";
+import HostComponent from "../components/Hosts";
 
 const Router = () => useRoutes(
   [
@@ -12,9 +14,13 @@ const Router = () => useRoutes(
       element: <AuthGuard />,
       children: [
         { element: <Home />, index: true },
+        { path: 'other', element: <OtherComponent /> },
         {
-          path: 'other',
-          element: <OtherComponent />
+          path: 'host/',
+          element: <HostGuard />,
+          children: [
+            { element: <HostComponent/>, index: true }
+          ]
         }
       ]
     },

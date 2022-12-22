@@ -136,9 +136,11 @@ const AuthContextProvider: FC<Props> = ({ children }) => {
     } catch (err) {
       const { response } = err as AxiosError<GenericApiResponse>;
       setLoading(false);
-      setError(
-        response?.data?.message ?? "An error occurred while logging out"
-      );
+      if (response?.data.message !== "unauthorized") {
+        setError(
+          response?.data?.message ?? "An error occurred while logging out"
+        );
+      }
     }
   };
 
