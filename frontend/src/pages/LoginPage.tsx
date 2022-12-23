@@ -1,9 +1,11 @@
 import { Formik, Form, Field } from "formik";
 import * as yup from "yup";
 import { AuthContext } from "../context/AuthContext";
-import { useContext } from "react";
+import { useContext, useState } from "react";
 import { Link } from "react-router-dom";
 import Loader from "../components/Loader/Loader";
+import { AxiosError } from "axios";
+import { Alert } from "react-bootstrap";
 
 interface FormValues {
   email: string;
@@ -27,14 +29,22 @@ const initialFormValues: FormValues = {
 };
 
 const LoginPage = () => {
-  const { login, error, loading, displayMessage } = useContext(AuthContext);
+  const { login } = useContext(AuthContext);
+  const [error, setError] = useState<string | null>(null);
 
-  const handleSubmit = (
+  const handleSubmit = async (
     { email, password }: FormValues,
     setSubmitting: (isSubmitting: boolean) => void
   ) => {
-    login(email, password);
-    setSubmitting(false);
+    try {
+      await login(email, password);
+    } catch (err) {
+      const { response } = err as AxiosError<{ message: string }>;
+      setError(
+        response?.data.message ?? "An error occurred while logging in"
+      );
+      setSubmitting(false);
+    }
   };
   return (
     <div className="container">
@@ -46,10 +56,13 @@ const LoginPage = () => {
             </div>
             <div className="">
               <div className="py-2">
-                {displayMessage && (
-                  <div className="alert alert-success"> {displayMessage} </div>
+                {error ? (
+                  <Alert variant="danger">
+                    <span> {error} </span>
+                  </Alert>
+                ) : (
+                  <></>
                 )}
-                {error && <div className="alert alert-danger"> {error} </div>}
                 <Formik
                   initialValues={initialFormValues}
                   validationSchema={formValidationSchema}
@@ -57,7 +70,7 @@ const LoginPage = () => {
                     handleSubmit(values, setSubmitting);
                   }}
                 >
-                  {({ touched, errors }) => (
+                  {({ touched, errors, isSubmitting }) => (
                     <Form>
                       <div className="pb-4 input-group">
                         <label htmlFor="email" className="form-label">
@@ -107,11 +120,9 @@ const LoginPage = () => {
                       <button
                         type="submit"
                         className="btn btn-danger btn-block w-100 d-flex align-items-center justify-content-center"
-                        disabled={loading}
+                        disabled={isSubmitting}
                       >
-                        {
-                          loading ? <Loader /> : 'Log in'
-                        }
+                        {isSubmitting ? <Loader /> : "Log in"}
                       </button>
                     </Form>
                   )}

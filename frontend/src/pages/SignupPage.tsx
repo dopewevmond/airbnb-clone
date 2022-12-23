@@ -4,6 +4,8 @@ import { useState, useContext } from "react";
 import { AuthContext } from "../context/AuthContext";
 import { Link } from "react-router-dom";
 import Loader from "../components/Loader/Loader";
+import { AxiosError } from "axios";
+import { Alert } from "react-bootstrap";
 
 interface FormValues {
   firstName: string;
@@ -34,14 +36,20 @@ const initialFormValues: FormValues = {
 
 const SignupPage = () => {
   const [passwordHidden, setPasswordHidden] = useState(true);
-  const { signup, error, loading, displayMessage } = useContext(AuthContext);
+  const [error, setError] = useState<string | null>(null);
+  const { signup } = useContext(AuthContext);
 
-  const handleSubmit = (
+  const handleSubmit = async (
     { firstName, lastName, email, password }: FormValues,
     setSubmitting: (isSubmitting: boolean) => void
   ) => {
-    signup(firstName, lastName, email, password);
-    setSubmitting(false);
+    try {
+      await signup(firstName, lastName, email, password);
+    } catch (err) {
+      const { response } = err as AxiosError<{ message: string }>;
+      setError(response?.data.message ?? "An error occurred while signing up");
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -54,10 +62,13 @@ const SignupPage = () => {
             </div>
             <div className="">
               <div className="py-2">
-              {displayMessage && (
-                  <div className="alert alert-success"> {displayMessage} </div>
+                {error ? (
+                  <Alert variant="danger">
+                    <span> {error} </span>
+                  </Alert>
+                ) : (
+                  <></>
                 )}
-                {error && <div className="alert alert-danger"> {error} </div>}
                 <Formik
                   initialValues={initialFormValues}
                   validationSchema={formValidationSchema}
@@ -176,11 +187,9 @@ const SignupPage = () => {
                       <button
                         type="submit"
                         className="btn btn-danger btn-block w-100 d-flex align-items-center justify-content-center"
-                        disabled={loading}
+                        disabled={isSubmitting}
                       >
-                        {
-                          loading ? <Loader /> : 'Sign up'
-                        }
+                        {isSubmitting ? <Loader /> : "Sign up"}
                       </button>
                     </Form>
                   )}
