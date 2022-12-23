@@ -35,7 +35,7 @@ class ListingController implements Controller {
   }
 
   private setupRoutes (): void {
-    this.router.get(this.path, authenticateJWT, tryCatchWrapper(this.GetListings))
+    this.router.get(this.path, tryCatchWrapper(this.GetListings))
     this.router.post(this.path, authenticateJWT, checkHost, validateInputs(ListingSchema), tryCatchWrapper(this.AddListing))
     this.router.patch(`${this.path}/:id`, authenticateJWT, checkHost, validateInputs(ListingSchema), tryCatchWrapper(this.EditListing))
     this.router.delete(`${this.path}/:id`, authenticateJWT, checkHost, validateInputs(IdSchema), tryCatchWrapper(this.DeleteListing))
