@@ -1,11 +1,11 @@
 import { FC, createContext, useState, useEffect, ReactNode } from "react";
-import { userInfoKey, refreshTokenKey, BASE_URL } from "../utils/constants";
+import { BASE_URL } from "../utils/constants";
 import jwtDecode from "jwt-decode";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import { clearUserData, getUserData, setUserData } from "../utils/authHelper";
 
 export interface IUser {
-  isLoggedIn: boolean;
   email: string | null;
   role: string | null;
   accessToken: string | null;
@@ -14,6 +14,7 @@ interface Props {
   children?: ReactNode;
 }
 interface IAuthContext extends IUser {
+  isLoggedIn: boolean;
   loading: boolean; // makes the authguard hold on while localstorage is checked for token
   login: (email: string, password: string) => Promise<void>;
   signup: (
@@ -42,11 +43,11 @@ const initialAuthContext: IAuthContext = {
 
 export const AuthContext = createContext<IAuthContext>(initialAuthContext);
 
-interface LoginApiResponse {
+export interface LoginApiResponse {
   accessToken: string;
   refreshToken: string;
 }
-interface IDecodedJWT {
+export interface IDecodedJWT {
   email: string;
   role: string;
   token_id: string;
@@ -60,15 +61,14 @@ const AuthContextProvider: FC<Props> = ({ children }) => {
   const [accessToken, setAccessToken] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   useEffect(() => {
-    const userInfo = localStorage.getItem(userInfoKey);
+    const userInfo = getUserData();
     if (userInfo != null) {
-      const jsonUserInfo: IUser = JSON.parse(userInfo);
-      setEmail(jsonUserInfo.email);
-      setRole(jsonUserInfo.role);
-      setAccessToken(jsonUserInfo.accessToken);
+      setEmail(userInfo.email);
+      setRole(userInfo.role);
+      setAccessToken(userInfo.accessToken);
       setLoggedIn(true);
     }
-    setLoading(false)
+    setLoading(false);
   }, []);
 
   const login = async (email: string, password: string): Promise<void> => {
@@ -85,15 +85,7 @@ const AuthContextProvider: FC<Props> = ({ children }) => {
     setRole(jwtInfo.role);
     setAccessToken(data.accessToken);
     setLoggedIn(true);
-    const jsonUserInfo: IUser = {
-      isLoggedIn: true,
-      email: jwtInfo.email,
-      role: jwtInfo.role,
-      accessToken: data.accessToken,
-    };
-    localStorage.setItem(userInfoKey, JSON.stringify(jsonUserInfo));
-    localStorage.setItem(refreshTokenKey, JSON.stringify(data.refreshToken));
-
+    setUserData(data.accessToken, data.refreshToken); // storing auth data in localStorage
     navigate("/");
   };
 
@@ -101,8 +93,7 @@ const AuthContextProvider: FC<Props> = ({ children }) => {
     setEmail(null);
     setRole(null);
     setLoggedIn(false);
-    localStorage.removeItem(userInfoKey);
-    localStorage.removeItem(refreshTokenKey);
+    clearUserData(); // removes auth data from localStorage
     await axios.post(`${BASE_URL}/auth/logout`, null, {
       headers: {
         authorization: `Bearer ${accessToken}`,
