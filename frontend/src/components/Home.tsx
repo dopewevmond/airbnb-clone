@@ -1,31 +1,62 @@
 import { AuthContext } from "../context/AuthContext";
 import React, { useEffect, useState } from "react";
-import axiosAuthInstance from "../utils/axiosclient";
+import useAxios from "../hooks/useAxios";
+
+interface Listing {
+  id: number
+  name: string
+  city: string
+  country: string
+}
+
+interface Booking {
+  id: number
+  paid_for: boolean
+  start_date: Date
+  end_date: Date
+  created_at: Date
+  visited_listing: boolean
+  total_amount: number
+  listing: Listing
+}
+
+interface BookingsResponse {
+  bookings: Booking[]
+}
 
 const Home = () => {
-  const [bookings, setBookings] = useState<any>(null);
+  const { axiosAuthInstance } = useAxios();
+  const [bookings, setBookings] = useState<Booking[]>([])
   useEffect(() => {
-      axiosAuthInstance({ method: 'GET', url: '/bookings'},)
-        .then((res) => {
-          console.log(res.data)
-        })
-        .catch((err) => {
-          console.log(err)
-        })
+    const getBookings = async () => {
+      const { data } = await axiosAuthInstance<BookingsResponse>({ method: 'GET', url: '/bookings' })
+      setBookings(data.bookings)
+    }
+    getBookings().catch((err) => {
+      console.log(err)
+    })
   }, []);
 
   return (
     <AuthContext.Consumer>
-      {({ isLoggedIn, email, accessToken, role, logout }) => (
-        <>
-          <span>this is the home component</span>
+      {({ email, logout }) => (
+        <div className="container">
+          <h3>this is the home component</h3>
+
+          <p>email: {email} </p>
+
           <ul>
-            <li>isLoggedIn: {isLoggedIn ? "true" : "false"} </li>
-            <li>email: {email} </li>
-            <li>accessToken: {accessToken} </li>
-            <li>role: {role} </li>
+            {
+              bookings && bookings.map((booking) => (
+                <li key={booking.id}>
+                  <>
+                  listing: {booking.listing.name} <br/> from: {booking.start_date} <br /> to: {booking.end_date} <br /> booked at: {booking.created_at}
+                  </>
+                </li>
+              ))
+            }
           </ul>
-          {bookings}
+
           <button
             onClick={(e: React.MouseEvent<HTMLElement>) => {
               logout();
@@ -34,7 +65,7 @@ const Home = () => {
           >
             Logout
           </button>
-        </>
+        </div>
       )}
     </AuthContext.Consumer>
   );

@@ -2,7 +2,7 @@ import { FC, createContext, useState, useEffect, ReactNode } from "react";
 import { BASE_URL } from "../utils/constants";
 import jwtDecode from "jwt-decode";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 import { clearUserData, getUserData, setUserData } from "../utils/authHelper";
 
 export interface IUser {
@@ -16,6 +16,7 @@ interface Props {
 interface IAuthContext extends IUser {
   isLoggedIn: boolean;
   loading: boolean; // makes the authguard hold on while localstorage is checked for token
+  setAccessToken: (accessToken: string) => void;
   login: (email: string, password: string) => Promise<void>;
   signup: (
     firstName: string,
@@ -31,6 +32,7 @@ const initialAuthContext: IAuthContext = {
   email: null,
   accessToken: null,
   role: null,
+  setAccessToken: () => {},
   login: (email: string, password: string) => Promise.resolve(),
   signup: (
     firstName: string,
@@ -89,16 +91,29 @@ const AuthContextProvider: FC<Props> = ({ children }) => {
     navigate("/");
   };
 
+  const axiosLogout = axios.create({
+    baseURL: BASE_URL,
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+    },
+  });
+  axiosLogout.interceptors.response.use(
+    (response) => {
+      return Promise.resolve(response);
+    },
+    async (error) => {
+      const { response } = error as AxiosError<{ message?: string }>;
+      if (response?.data.message === ("jwt expired" || "unauthorized")) {
+        return Promise.reject({ message: "User already logged out" });
+      }
+      return Promise.reject(error);
+    }
+  );
+
   const logout = async () => {
-    setEmail(null);
-    setRole(null);
     setLoggedIn(false);
     clearUserData(); // removes auth data from localStorage
-    await axios.post(`${BASE_URL}/auth/logout`, null, {
-      headers: {
-        authorization: `Bearer ${accessToken}`,
-      },
-    });
+    await axiosLogout({ method: "POST", url: "/auth/logout" });
   };
 
   const signup = async (
@@ -128,6 +143,7 @@ const AuthContextProvider: FC<Props> = ({ children }) => {
         role,
         isLoggedIn,
         accessToken,
+        setAccessToken,
         login,
         signup,
         logout,
