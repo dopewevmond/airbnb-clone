@@ -106,7 +106,9 @@ class AuthController implements Controller {
 
   private async PasswordResetHandlerPost (req: Request, res: Response, next: NextFunction): Promise<void> {
     const { token, newPassword } = req.body
-    const user = jwt.verify(token, SECRET) as jwt.JwtPayload
+    let user: jwt.JwtPayload
+    try {
+      user = jwt.verify(token, SECRET) as jwt.JwtPayload
     const email = user.email as string
     const tokenId = user.token_id as string
     const redisPrefix: IRedisPrefix = 'resetToken-'
@@ -126,12 +128,20 @@ class AuthController implements Controller {
     await userRepository.save(userToChangePassword)
     await redisClient.del(redisPrefix + email)
     res.status(200).json({ message: 'password changed successfully' })
+    } catch (err) {
+      if (err instanceof Error) {
+        return next(new HttpException(401, err.message))
+      }
+      return next(new HttpException(401, 'invalid refresh token'))
+    }
   }
 
   private async RefreshTokenHandler (req: Request, res: Response, next: NextFunction): Promise<void> {
     const { token } = req.body
-    const user = jwt.verify(token, REFRESH_SECRET) as jwt.JwtPayload
-    const oldRefreshTokenId = user.token_id as string
+    let user: jwt.JwtPayload
+    try {
+      user = jwt.verify(token, REFRESH_SECRET) as jwt.JwtPayload
+      const oldRefreshTokenId = user.token_id as string
     const redisPrefix: IRedisPrefix = 'refreshToken-'
     const validRefreshToken = await redisClient.get(redisPrefix + oldRefreshTokenId)
     if (validRefreshToken == null) {
@@ -144,6 +154,12 @@ class AuthController implements Controller {
     await redisClient.del(redisPrefix + oldRefreshTokenId)
     await redisClient.set(redisPrefix + newTokenId, 'exists', { EX: parseInt(REFRESH_TOKEN_EXPIRY_TIME) })
     res.json({ accessToken, refreshToken })
+    } catch (err) {
+      if (err instanceof Error) {
+        return next(new HttpException(401, err.message))
+      }
+      return next(new HttpException(401, 'invalid refresh token'))
+    }
   }
 
   private async LogoutHandler (req: Request, res: Response, next: NextFunction): Promise<void> {
