@@ -1,11 +1,12 @@
-import { FC, createContext, useState, useEffect, ReactNode } from "react";
+import { FC, createContext, useState, ReactNode } from "react";
 import { BASE_URL } from "../utils/constants";
 import jwtDecode from "jwt-decode";
 import { useNavigate } from "react-router-dom";
 import axios, { AxiosError } from "axios";
 import { clearUserData, getUserData, setUserData } from "../utils/authHelper";
 
-export interface IUser {
+export interface User {
+  id: number | null;
   email: string | null;
   role: string | null;
   accessToken: string | null;
@@ -13,9 +14,9 @@ export interface IUser {
 interface Props {
   children?: ReactNode;
 }
-interface IAuthContext extends IUser {
+interface IAuthContext extends User {
   isLoggedIn: boolean;
-  loading: boolean; // makes the authguard hold on while localstorage is checked for token
+  // loading: boolean; // makes the authguard hold on while localstorage is checked for token
   setAccessToken: (accessToken: string) => void;
   login: (email: string, password: string) => Promise<void>;
   signup: (
@@ -27,11 +28,11 @@ interface IAuthContext extends IUser {
   logout: () => Promise<void>;
 }
 const initialAuthContext: IAuthContext = {
-  loading: true,
-  isLoggedIn: false,
-  email: null,
-  accessToken: null,
-  role: null,
+  isLoggedIn: Boolean(getUserData()?.accessToken) ?? false,
+  id: getUserData()?.id ?? null,
+  email: getUserData()?.email ?? null,
+  accessToken: getUserData()?.accessToken ?? null,
+  role: getUserData()?.role ?? null,
   setAccessToken: () => {},
   login: (email: string, password: string) => Promise.resolve(),
   signup: (
@@ -50,6 +51,7 @@ export interface LoginApiResponse {
   refreshToken: string;
 }
 export interface IDecodedJWT {
+  id: number,
   email: string;
   role: string;
   token_id: string;
@@ -57,27 +59,18 @@ export interface IDecodedJWT {
 
 const AuthContextProvider: FC<Props> = ({ children }) => {
   const navigate = useNavigate();
-  const [email, setEmail] = useState<string | null>(null);
-  const [role, setRole] = useState<string | null>(null);
-  const [isLoggedIn, setLoggedIn] = useState(false);
-  const [accessToken, setAccessToken] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true);
-  useEffect(() => {
-    const userInfo = getUserData();
-    if (userInfo != null) {
-      setEmail(userInfo.email);
-      setRole(userInfo.role);
-      setAccessToken(userInfo.accessToken);
-      setLoggedIn(true);
-    }
-    setLoading(false);
-  }, []);
+  const [id, setId] = useState<number|null>(initialAuthContext.id)
+  const [email, setEmail] = useState<string | null>(initialAuthContext.email);
+  const [role, setRole] = useState<string | null>(initialAuthContext.role);
+  const [isLoggedIn, setLoggedIn] = useState(initialAuthContext.isLoggedIn);
+  const [accessToken, setAccessToken] = useState<string | null>(initialAuthContext.accessToken);
 
   const login = async (email: string, password: string): Promise<void> => {
     setEmail(null);
     setRole(null);
     setAccessToken(null);
     setLoggedIn(false);
+    setId(null)
     const { data } = await axios.post<LoginApiResponse>(
       `${BASE_URL}/auth/login`,
       { email, password }
@@ -85,10 +78,15 @@ const AuthContextProvider: FC<Props> = ({ children }) => {
     const jwtInfo = jwtDecode(data.accessToken) as IDecodedJWT;
     setEmail(jwtInfo.email);
     setRole(jwtInfo.role);
+    setId(jwtInfo.id)
     setAccessToken(data.accessToken);
     setLoggedIn(true);
     setUserData(data.accessToken, data.refreshToken); // storing auth data in localStorage
-    navigate("/");
+    if (jwtInfo.role === "host") {
+      navigate("/hosting");
+    } else {
+      navigate("/");
+    }
   };
 
   const axiosLogout = axios.create({
@@ -126,6 +124,7 @@ const AuthContextProvider: FC<Props> = ({ children }) => {
     setRole(null);
     setAccessToken(null);
     setLoggedIn(false);
+    setId(null)
     await axios.post(`${BASE_URL}/auth/signup`, {
       firstName,
       lastName,
@@ -138,7 +137,7 @@ const AuthContextProvider: FC<Props> = ({ children }) => {
   return (
     <AuthContext.Provider
       value={{
-        loading,
+        id,
         email,
         role,
         isLoggedIn,

@@ -49,7 +49,8 @@ const useAxios = () => {
     async (error) => {
       const { response } = error as AxiosError<{ message?: string }>;
       if (
-        response?.data.message === ("jwt expired" || "invalid refresh token")
+        response?.data.message === "jwt expired" ||
+        response?.data.message === "invalid refresh token"
       ) {
         await logout();
       }

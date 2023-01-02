@@ -1,12 +1,12 @@
 import { refreshTokenKey, userInfoKey } from "./constants";
-import { IDecodedJWT, IUser } from "../context/AuthContext";
+import { IDecodedJWT, User } from "../context/AuthContext";
 import jwtDecode from "jwt-decode";
 
 export const getAccessToken = () => {
   let accessToken = "";
   const userInfo = localStorage.getItem(userInfoKey);
   if (userInfo != null) {
-    const jsonUserInfo: IUser = JSON.parse(userInfo);
+    const jsonUserInfo: User = JSON.parse(userInfo);
     accessToken = jsonUserInfo.accessToken ? jsonUserInfo.accessToken : "";
   }
   return accessToken;
@@ -27,7 +27,8 @@ export const getRefreshToken = () => {
  */
 export const setUserData = (accessToken: string, refreshToken: string) => {
   const jwtInfo = jwtDecode(accessToken) as IDecodedJWT;
-  const jsonUserInfo: IUser = {
+  const jsonUserInfo: User = {
+    id: jwtInfo.id,
     email: jwtInfo.email,
     role: jwtInfo.role,
     accessToken,
@@ -47,7 +48,7 @@ export const clearUserData = () => {
  */
 export const getUserData = () => {
   const userInfo = localStorage.getItem(userInfoKey);
-  let jsonUserInfo: IUser | null = null;
+  let jsonUserInfo: User | null = null;
   if (userInfo != null) {
     jsonUserInfo = JSON.parse(userInfo);
   }
