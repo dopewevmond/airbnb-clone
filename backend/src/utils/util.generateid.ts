@@ -1,18 +1,14 @@
 /**
- * Returns a random alphanumeric string
- *
- * @param length - preferred string length
- * @returns Random alphanumeric string of length `length`
+ * Returns a uuid (v4)
  */
-const makeid = (length: number): string => {
-  let result = ''
-  const characters =
-      'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
-  const charactersLength = characters.length
-  for (let i = 0; i < length; i++) {
-    result += characters.charAt(Math.floor(Math.random() * charactersLength))
-  }
-  return result
+const makeid = (): string => {
+  let dt = new Date().getTime()
+  const uuid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+    const r = (dt + Math.random() * 16) % 16 | 0
+    dt = Math.floor(dt / 16)
+    return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16)
+  })
+  return uuid
 }
 
 export default makeid

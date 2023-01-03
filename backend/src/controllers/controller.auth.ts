@@ -46,7 +46,7 @@ class AuthController implements Controller {
 
   private async LoginHandler (req: Request, res: Response, next: NextFunction): Promise<void> {
     const { email, password } = req.body
-    const user = await userRepository.findOne({ where: { email_address: email }, select: ['email_address', 'password_hash', 'user_role'] })
+    const user = await userRepository.findOne({ where: { email_address: email }, select: ['id', 'email_address', 'password_hash', 'user_role'] })
     if (user == null) {
       return next(new WrongCredentialsException())
     }
@@ -54,11 +54,11 @@ class AuthController implements Controller {
     if (!passwordMatch) {
       return next(new WrongCredentialsException())
     }
-    const tokenId = makeid(128)
+    const tokenId = makeid()
     const redisPrefix: IRedisPrefix = 'refreshToken-'
     await redisClient.set(redisPrefix + tokenId, 'exists', { EX: parseInt(REFRESH_TOKEN_EXPIRY_TIME) })
-    const accessToken = signAccessToken(user.email_address, user.user_role, tokenId)
-    const refreshToken = signRefreshToken(user.email_address, user.user_role, tokenId)
+    const accessToken = signAccessToken(user.id, user.email_address, user.user_role, tokenId)
+    const refreshToken = signRefreshToken(user.id, user.email_address, user.user_role, tokenId)
     res.json({ accessToken, refreshToken })
   }
 
@@ -79,7 +79,7 @@ class AuthController implements Controller {
   }
 
   private async getPasswordResetToken (email: string): Promise<string | undefined> {
-    const tokenId = makeid(128)
+    const tokenId = makeid()
     const redisPrefix: IRedisPrefix = 'resetToken-'
     const prevResetTokenObj = await redisClient.get(redisPrefix + email)
     if (prevResetTokenObj != null) {
@@ -109,25 +109,25 @@ class AuthController implements Controller {
     let user: jwt.JwtPayload
     try {
       user = jwt.verify(token, SECRET) as jwt.JwtPayload
-    const email = user.email as string
-    const tokenId = user.token_id as string
-    const redisPrefix: IRedisPrefix = 'resetToken-'
-    const tokenObj = await redisClient.get(redisPrefix + email)
-    if (tokenObj == null) {
-      return next(new HttpException(401, 'invalid password reset token'))
-    }
-    const validTokenId = JSON.parse(tokenObj).token_id
-    if (validTokenId !== tokenId) {
-      return next(new HttpException(401, 'invalid password reset token. Please use most recent token'))
-    }
-    const userToChangePassword = await userRepository.findOne({ where: { email_address: email } })
-    if (userToChangePassword == null) {
-      return next(new NotFoundException('user', 'email', email))
-    }
-    userToChangePassword.password_hash = await bcrypt.hash(newPassword, 10)
-    await userRepository.save(userToChangePassword)
-    await redisClient.del(redisPrefix + email)
-    res.status(200).json({ message: 'password changed successfully' })
+      const email = user.email as string
+      const tokenId = user.token_id as string
+      const redisPrefix: IRedisPrefix = 'resetToken-'
+      const tokenObj = await redisClient.get(redisPrefix + email)
+      if (tokenObj == null) {
+        return next(new HttpException(401, 'invalid password reset token'))
+      }
+      const validTokenId = JSON.parse(tokenObj).token_id
+      if (validTokenId !== tokenId) {
+        return next(new HttpException(401, 'invalid password reset token. Please use most recent token'))
+      }
+      const userToChangePassword = await userRepository.findOne({ where: { email_address: email } })
+      if (userToChangePassword == null) {
+        return next(new NotFoundException('user', 'email', email))
+      }
+      userToChangePassword.password_hash = await bcrypt.hash(newPassword, 10)
+      await userRepository.save(userToChangePassword)
+      await redisClient.del(redisPrefix + email)
+      res.status(200).json({ message: 'password changed successfully' })
     } catch (err) {
       if (err instanceof Error) {
         return next(new HttpException(401, err.message))
@@ -142,18 +142,18 @@ class AuthController implements Controller {
     try {
       user = jwt.verify(token, REFRESH_SECRET) as jwt.JwtPayload
       const oldRefreshTokenId = user.token_id as string
-    const redisPrefix: IRedisPrefix = 'refreshToken-'
-    const validRefreshToken = await redisClient.get(redisPrefix + oldRefreshTokenId)
-    if (validRefreshToken == null) {
-      return next(new HttpException(401, 'invalid refresh token'))
-    }
-    const newTokenId = makeid(128)
-    const accessToken = signAccessToken(user.email, user.role, newTokenId)
-    const refreshToken = signRefreshToken(user.email, user.role, newTokenId)
-    // invalidate the previous refresh token since it has been used
-    await redisClient.del(redisPrefix + oldRefreshTokenId)
-    await redisClient.set(redisPrefix + newTokenId, 'exists', { EX: parseInt(REFRESH_TOKEN_EXPIRY_TIME) })
-    res.json({ accessToken, refreshToken })
+      const redisPrefix: IRedisPrefix = 'refreshToken-'
+      const validRefreshToken = await redisClient.get(redisPrefix + oldRefreshTokenId)
+      if (validRefreshToken == null) {
+        return next(new HttpException(401, 'invalid refresh token'))
+      }
+      const newTokenId = makeid()
+      const accessToken = signAccessToken(user.id, user.email, user.role, newTokenId)
+      const refreshToken = signRefreshToken(user.id, user.email, user.role, newTokenId)
+      // invalidate the previous refresh token since it has been used
+      await redisClient.del(redisPrefix + oldRefreshTokenId)
+      await redisClient.set(redisPrefix + newTokenId, 'exists', { EX: parseInt(REFRESH_TOKEN_EXPIRY_TIME) })
+      res.json({ accessToken, refreshToken })
     } catch (err) {
       if (err instanceof Error) {
         return next(new HttpException(401, err.message))

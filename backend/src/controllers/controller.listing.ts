@@ -18,6 +18,7 @@ import Room from '../entities/entity.room'
 import validateInputs from '../middleware/middleware.validate'
 import { AmenitySchema, IdSchema, ListingSchema, RoomSchema } from '../schema/schema.listing'
 import checkHost from '../middleware/middleware.checkhost'
+import NotFoundException from '../exceptions/exception.notfound'
 
 const listingRepository = AppDataSource.getRepository(Listing)
 const userRepository = AppDataSource.getRepository(User)
@@ -36,6 +37,7 @@ class ListingController implements Controller {
 
   private setupRoutes (): void {
     this.router.get(this.path, tryCatchWrapper(this.GetListings))
+    this.router.get(`${this.path}/:id`, validateInputs(IdSchema), tryCatchWrapper(this.GetOneListing))
     this.router.post(this.path, authenticateJWT, checkHost, validateInputs(ListingSchema), tryCatchWrapper(this.AddListing))
     this.router.patch(`${this.path}/:id`, authenticateJWT, checkHost, validateInputs(ListingSchema), tryCatchWrapper(this.EditListing))
     this.router.delete(`${this.path}/:id`, authenticateJWT, checkHost, validateInputs(IdSchema), tryCatchWrapper(this.DeleteListing))
@@ -47,6 +49,15 @@ class ListingController implements Controller {
   private async GetListings (req: Request, res: Response, next: NextFunction): Promise<void> {
     const listings = await listingRepository.find({ relations: { owner: true, photos: { photo: true }, amenities: true, rooms: true } })
     res.json({ listings })
+  }
+
+  private async GetOneListing (req: Request, res: Response, next: NextFunction): Promise<void> {
+    const { id } = req.params
+    const listing = await listingRepository.findOne({ where: { id: parseInt(id) }, relations: { owner: true, photos: { photo: true }, amenities: true, rooms: true } })
+    if (listing == null) {
+      return next(new NotFoundException('listing', 'id', id))
+    }
+    res.json({ ...listing })
   }
 
   private async AddRoomToListing (req: Request, res: Response, next: NextFunction): Promise<void> {

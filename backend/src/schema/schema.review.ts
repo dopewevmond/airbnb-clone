@@ -1,14 +1,14 @@
 import * as yup from 'yup'
 
 export const GetHostReviewSchema = yup.object({
-  body: yup.object({
-    hostId: yup.number().required()
+  params: yup.object({
+    id: yup.number().required()
   })
 })
 
 export const GetListingReviewSchema = yup.object({
-  body: yup.object({
-    listingId: yup.number().required()
+  params: yup.object({
+    id: yup.number().required()
   })
 })
 

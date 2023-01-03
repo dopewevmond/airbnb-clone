@@ -37,23 +37,21 @@ class ReviewController implements Controller {
   }
 
   private setupRoutes (): void {
-    this.router.route(this.path + '/hosts')
-      .get(authenticateJWT, validateInputs(GetHostReviewSchema), tryCatchWrapper(this.GetHostReviews))
-      .post(authenticateJWT, validateInputs(AddHostReviewSchema), tryCatchWrapper(this.AddHostReview))
+    this.router.get(`${this.path}/hosts/:id`, validateInputs(GetHostReviewSchema), tryCatchWrapper(this.GetHostReviews))
+    this.router.post(this.path + '/hosts', authenticateJWT, validateInputs(AddHostReviewSchema), tryCatchWrapper(this.AddHostReview))
     this.router.patch(`${this.path}/hosts/:id`, authenticateJWT, validateInputs(ReplyHostReviewSchema), tryCatchWrapper(this.ReplyHostReview))
 
-    this.router.route(this.path + '/listings')
-      .get(authenticateJWT, validateInputs(GetListingReviewSchema), tryCatchWrapper(this.GetListingReviews))
-      .post(authenticateJWT, validateInputs(AddListingReviewSchema), tryCatchWrapper(this.AddListingReview))
+    this.router.get(`${this.path}/listings/:id`, validateInputs(GetListingReviewSchema), tryCatchWrapper(this.GetListingReviews))
+    this.router.post(`${this.path}/listings`, authenticateJWT, validateInputs(AddListingReviewSchema), tryCatchWrapper(this.AddListingReview))
     this.router.patch(`${this.path}/listings/:id`, authenticateJWT, validateInputs(ReplyHostReviewSchema), tryCatchWrapper(this.ReplyListingReview))
   }
 
   private async GetHostReviews (req: Request, res: Response, next: NextFunction): Promise<void> {
-    const { hostId } = req.body
+    const { id } = req.params
     const reviews = await hostReviewRepository
       .find({
         where:
-      { host: { id: parseInt(hostId) } },
+      { host: { id: parseInt(id) } },
         relations: { visitor: true }
       })
     res.json({ reviews })
@@ -98,11 +96,11 @@ class ReviewController implements Controller {
   }
 
   private async GetListingReviews (req: Request, res: Response, next: NextFunction): Promise<void> {
-    const { listingId } = req.body
+    const { id } = req.params
     const reviews = await listingReviewRepository
       .find({
         where:
-         { listing: { id: parseInt(listingId) } },
+         { listing: { id: parseInt(id) } },
         relations: { reviewer: true }
       })
     res.json({ reviews })

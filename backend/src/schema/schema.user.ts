@@ -5,10 +5,10 @@ export const EditProfileSchema = yup.object({
   body: yup.object({
     firstName: yup.string().max(50),
     lastName: yup.string().max(50),
-    phoneNumber: yup.string().min(12).max(12),
-    nativeLanguage: yup.string().oneOf(languages),
-    secondaryLanguage: yup.string().oneOf(languages),
-    bio: yup.string()
+    phoneNumber: yup.string().max(12).notRequired(),
+    nativeLanguage: yup.string().oneOf(languages).notRequired(),
+    secondaryLanguage: yup.string().oneOf(languages).notRequired(),
+    bio: yup.string().max(255).notRequired()
   })
 })
 

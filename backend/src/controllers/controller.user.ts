@@ -50,7 +50,10 @@ class UserController implements Controller {
     if (emailOfUserToEditProfile == null) {
       return next(new BadRequestException('could not find email of user to edit'))
     }
-    const userToEditProfile = await userRepository.findOne({ where: { email_address: emailOfUserToEditProfile } })
+    const userToEditProfile = await userRepository.findOne({
+      where: { email_address: emailOfUserToEditProfile },
+      select: ['id', 'first_name', 'last_name', 'email_address', 'bio', 'created_at', 'phone_number', 'created_at', 'native_language', 'secondary_language', 'is_super_host', 'has_verified_email', 'profile_photo']
+    })
     if (userToEditProfile == null) {
       return next(new NotFoundException('user', 'email', emailOfUserToEditProfile))
     }
@@ -61,7 +64,7 @@ class UserController implements Controller {
     userToEditProfile.secondary_language = secondaryLanguage
     userToEditProfile.bio = bio
     await userRepository.save(userToEditProfile)
-    res.json({ message: 'Updated profile successfully' })
+    res.json({ message: 'Updated profile successfully', user: userToEditProfile })
   }
 
   private async NullifyFieldHandler (req: Request, res: Response, next: NextFunction): Promise<void> {

@@ -113,7 +113,7 @@ class BookingController implements Controller {
       end_date: endDate,
       created_at: new Date(),
       total_amount: listing.night_rate * durationInDays,
-      paid_for: false
+      paid_for: true
     })
     const { id: bookingId } = await bookingRepository.save(booking)
     res.status(201).json({ message: 'booking created successfully', id: bookingId })
@@ -160,7 +160,7 @@ class BookingController implements Controller {
       .find({
         where:
       { owner: { email_address: res.locals.user?.email } },
-        relations: { listing: true },
+        relations: { listing: { photos: { photo: true } } },
         order: { start_date: 'DESC' }
       })
     res.json({ bookings })

@@ -7,12 +7,12 @@ const ACCESS_TOKEN_EXPIRY_TIME = process.env.ACCESS_TOKEN_EXPIRY_TIME as string
 const REFRESH_TOKEN_EXPIRY_TIME = process.env.REFRESH_TOKEN_EXPIRY_TIME as string
 const RESET_TOKEN_EXPIRY_TIME = process.env.RESET_TOKEN_EXPIRY_TIME as string
 
-const signAccessToken = (email: string, role: string, tokenId: string): string => {
-  return jwt.sign({ email, role, token_id: tokenId }, SECRET, { expiresIn: parseInt(ACCESS_TOKEN_EXPIRY_TIME) })
+const signAccessToken = (id: number, email: string, role: string, tokenId: string): string => {
+  return jwt.sign({ id, email, role, token_id: tokenId }, SECRET, { expiresIn: parseInt(ACCESS_TOKEN_EXPIRY_TIME) })
 }
 
-const signRefreshToken = (email: string, role: string, tokenId: string): string => {
-  return jwt.sign({ email, role, token_id: tokenId }, REFRESH_SECRET, { expiresIn: parseInt(REFRESH_TOKEN_EXPIRY_TIME) })
+const signRefreshToken = (id: number, email: string, role: string, tokenId: string): string => {
+  return jwt.sign({ id, email, role, token_id: tokenId }, REFRESH_SECRET, { expiresIn: parseInt(REFRESH_TOKEN_EXPIRY_TIME) })
 }
 
 const signPasswordResetToken = (email: string, tokenId: string): string => {
