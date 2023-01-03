@@ -1,18 +1,27 @@
 import { useContext, useState } from "react";
 import moment from "moment";
 import { Modal } from "react-bootstrap";
+import { useAppSelector } from "../redux/store";
 
 import { AuthContext } from "../context/AuthContext";
 import { useProfileInfo } from "../hooks/useProfile";
 import { DEFAULT_AVI } from "../utils/constants";
 import ProfileTitleDetail from "../components/ProfileTitleDetail";
 import EditProfileModal from "../components/EditProfileModal";
+import {
+  selectProfile,
+  selectProfileError,
+  selectProfileLoading,
+} from "../redux/profileSlice";
 
 export const Profile = () => {
   const { id, role } = useContext(AuthContext);
-  const { profileDetails, loading, error } = useProfileInfo(id as number);
-  const [show, setShow] = useState(false);
+  useProfileInfo(id as number);
+  const profileDetails = useAppSelector(selectProfile);
+  const loading = useAppSelector(selectProfileLoading);
+  const error = useAppSelector(selectProfileError);
 
+  const [show, setShow] = useState(false);
   const toggleModal = () => setShow(!show);
 
   if (loading) return <div className="container"> Loading...</div>;
@@ -48,11 +57,16 @@ export const Profile = () => {
               )}
             </>
           ) : null}
+          {profileDetails.bio && (
+            <div className="mt-2">{profileDetails.bio}</div>
+          )}
         </div>
         <p style={{ fontSize: "0.9em", color: "#717171" }}>
           Member since {moment(profileDetails.created_at).format("MMMM YYYY")}{" "}
         </p>
-        <button className="btn btn-sm btn-primary" onClick={toggleModal}>Edit profile</button>
+        <button className="btn btn-sm btn-primary" onClick={toggleModal}>
+          Edit profile
+        </button>
         <hr />
         {profileDetails.email_address && (
           <ProfileTitleDetail
@@ -67,10 +81,6 @@ export const Profile = () => {
             title="Native language"
             detail={profileDetails.native_language}
           />
-        )}
-
-        {profileDetails.bio && (
-          <ProfileTitleDetail title="Bio" detail={profileDetails.bio} />
         )}
 
         {profileDetails.phone_number && (

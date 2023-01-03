@@ -3,11 +3,11 @@ import { useParams } from "react-router-dom";
 import { useListingDetails } from "../../hooks/useListing";
 import { Amenities } from "../../components/Amenities";
 import { PhotoGrid } from "../../components/PhotoGrid";
-import { InputGroup, DatePicker } from "rsuite";
 import { Rooms } from "../../components/Rooms";
 import { Reviews } from "../../components/Reviews";
 import moment from "moment";
 import { DEFAULT_AVI } from "../../utils/constants";
+import BookingForm from "../../components/BookingForm";
 
 const ListingDetail = () => {
   const { id } = useParams();
@@ -60,31 +60,13 @@ const ListingDetail = () => {
           <p>{listing.description}</p>
         </div>
         <div className="col-12 col-md-5 col-lg-4 offset-lg-1">
-          <div className="mb-2">
-            <span className="display-6">
-              <strong> ${listing.night_rate}</strong>
-            </span>{" "}
-            / night
+          <div className="border rounded p-4">
+            <BookingForm
+              id={listing.id}
+              night_rate={listing.night_rate}
+              min_nights_stay={listing.min_nights_stay}
+            />
           </div>
-          <InputGroup className="row mx-auto mb-2">
-            <DatePicker
-              placeholder="Check-in date"
-              format="yyyy-MM-dd"
-              block
-              appearance="subtle"
-              className="col-6 p-0"
-            />
-            <DatePicker
-              placeholder="Checkout date"
-              format="yyyy-MM-dd"
-              block
-              appearance="subtle"
-              className="col-6 p-0"
-            />
-          </InputGroup>
-          <button className="btn btn-danger w-100 d-block cs-button">
-            Reserve
-          </button>
         </div>
       </div>
 
@@ -126,16 +108,15 @@ const ListingDetail = () => {
                   width: "100%",
                   height: "100%",
                 }}
-                src={
-                  listing.owner.profile_photo ??
-                  DEFAULT_AVI
-                }
+                src={listing.owner.profile_photo ?? DEFAULT_AVI}
                 alt="pfp"
               />
             </div>
             <div style={{ alignSelf: "center", paddingLeft: "1em" }}>
               <p className="m-0">{listing.owner.first_name}</p>
-              <p className="m-0 cs-grayed-out cs-small-text">Joined in {moment(listing.owner.created_at).format('MMMM YYYY')} </p>
+              <p className="m-0 cs-grayed-out cs-small-text">
+                Joined in {moment(listing.owner.created_at).format("MMMM YYYY")}{" "}
+              </p>
             </div>
           </div>
         </div>

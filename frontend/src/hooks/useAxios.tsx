@@ -47,6 +47,7 @@ const useAxios = () => {
       return Promise.resolve(response);
     },
     async (error) => {
+      console.log(error);
       const { response } = error as AxiosError<{ message?: string }>;
       if (
         response?.data.message === "jwt expired" ||

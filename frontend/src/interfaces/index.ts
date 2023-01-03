@@ -77,3 +77,14 @@ export interface IReview {
   reply: string
   reviewer: IUser
 }
+
+export interface IBooking {
+  id: number
+  created_at: string
+  start_date: string
+  end_date: string
+  total_amount: number
+  paid_for: boolean
+  visited_listing: boolean
+  listing: IListingDetail
+}

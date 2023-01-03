@@ -1,4 +1,4 @@
-import './Navbar.scss'
+import "./Navbar.scss";
 import { useState, useContext, useRef, useEffect } from "react";
 import { Container, Navbar, ListGroup } from "react-bootstrap";
 import { Link } from "react-router-dom";
@@ -92,7 +92,7 @@ export const NavBar = ({ role }: Props) => {
             className="position-absolute"
             style={{
               display: isDropdownOpen ? "block" : "none",
-              zIndex: '1',
+              zIndex: "1",
               right: "1em",
               top: "3em",
             }}
@@ -102,22 +102,50 @@ export const NavBar = ({ role }: Props) => {
                 Signed in as: <br /> <strong>{email}</strong>
               </ListGroup.Item>
               <ListGroup.Item className="gray-bg-on-hover">
-                <Link onClick={toggleDropdown} to="/profile" className='d-block w-100 text-decoration-none text-reset'>
+                <Link
+                  onClick={toggleDropdown}
+                  to="/profile"
+                  className="d-block w-100 text-decoration-none text-reset"
+                >
                   Profile
                 </Link>
               </ListGroup.Item>
               {role === "host" ? (
                 <>
-                  <ListGroup.Item className="gray-bg-on-hover" role="button" disabled>Listings</ListGroup.Item>
-                  <ListGroup.Item className="gray-bg-on-hover" role="button" disabled>Reviews</ListGroup.Item>
+                  <ListGroup.Item
+                    className="gray-bg-on-hover"
+                    role="button"
+                    disabled
+                  >
+                    Listings
+                  </ListGroup.Item>
+                  <ListGroup.Item
+                    className="gray-bg-on-hover"
+                    role="button"
+                    disabled
+                  >
+                    Reviews
+                  </ListGroup.Item>
                 </>
               ) : (
                 <>
-                  <ListGroup.Item className="gray-bg-on-hover" role="button" disabled>Bookings</ListGroup.Item>
+                  <ListGroup.Item className="gray-bg-on-hover">
+                    <Link
+                      onClick={toggleDropdown}
+                      to="/bookings"
+                      className="d-block w-100 text-decoration-none text-reset"
+                    >
+                      Bookings
+                    </Link>
+                  </ListGroup.Item>
                 </>
               )}
 
-              <ListGroup.Item role="button" onClick={logout} className="gray-bg-on-hover">
+              <ListGroup.Item
+                role="button"
+                onClick={logout}
+                className="gray-bg-on-hover"
+              >
                 Log out
               </ListGroup.Item>
             </ListGroup>

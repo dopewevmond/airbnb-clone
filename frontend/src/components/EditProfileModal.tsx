@@ -1,7 +1,10 @@
 import { Modal, Button } from "react-bootstrap";
-import { Formik, Form, Field } from 'formik'
-import * as yup from 'yup'
+import { Formik, Form, Field } from "formik";
+import * as yup from "yup";
 import Loader from "../components/Loader/Loader";
+import { useAppSelector } from "../redux/store";
+import { selectProfile } from "../redux/profileSlice";
+import { useUpdateProfileDetails } from "../hooks/useProfile";
 
 type Props = {
   closeModal: () => void;
@@ -15,29 +18,37 @@ interface FormValues {
 }
 
 const formValidationSchema = yup.object().shape({
-  firstName: yup
-    .string()
-    .required("First name is required"),
-  lastName: yup
-    .string()
-    .required("Last name is required"),
+  firstName: yup.string().required("First name is required"),
+  lastName: yup.string().required("Last name is required"),
   phoneNumber: yup
     .string()
-    .min(12, "Phone number has to be 12 characters in the format (233)XXXXXXXXX")
-    .max(12, "Phone number has to be 12 characters in the format (233)XXXXXXXXX"),
-  bio: yup
-    .string()
-    .max(255, "Bio cannot be longer than 255 characters")
+    .min(
+      12,
+      "Phone number has to be 12 characters in the format (233)XXXXXXXXX"
+    )
+    .max(
+      12,
+      "Phone number has to be 12 characters in the format (233)XXXXXXXXX"
+    ),
+  bio: yup.string().max(255, "Bio cannot be longer than 255 characters"),
 });
 
-const initialFormValues: FormValues = {
-  firstName: "",
-  lastName: "",
-  phoneNumber: "",
-  bio: ""
-};
-
 const EditProfileModal = ({ closeModal }: Props) => {
+  const profileDetails = useAppSelector(selectProfile);
+  const updateProfile = useUpdateProfileDetails();
+
+  const initialFormValues: FormValues = {
+    firstName: profileDetails?.first_name ?? "",
+    lastName: profileDetails?.last_name ?? "",
+    phoneNumber: profileDetails?.phone_number ?? "",
+    bio: profileDetails?.bio ?? "",
+  };
+
+  const handleSubmit = async (values: FormValues) => {
+    await updateProfile(values);
+    closeModal();
+  };
+
   return (
     <>
       <Modal.Header closeButton>
@@ -47,10 +58,7 @@ const EditProfileModal = ({ closeModal }: Props) => {
         <Formik
           initialValues={initialFormValues}
           validationSchema={formValidationSchema}
-          onSubmit={(values, { setSubmitting }) => {
-            console.log(values)
-            setSubmitting(false)
-          }}
+          onSubmit={handleSubmit}
         >
           {({ touched, errors, isSubmitting }) => (
             <Form>
@@ -148,7 +156,7 @@ const EditProfileModal = ({ closeModal }: Props) => {
       </Modal.Body>
       <Modal.Footer>
         <Button variant="danger" onClick={closeModal}>
-          Close
+          Cancel
         </Button>
       </Modal.Footer>
     </>

@@ -8,6 +8,8 @@ import HostGuard from "./HostGuard";
 import HostComponent from "../pages/HostLayout";
 import ListingDetail from "../pages/ListingDetail/ListingDetail";
 import { Profile } from "../pages/Profile";
+import Booking from "../pages/Booking";
+import { BookingPayment } from "../pages/BookingPayment";
 
 const Router = () =>
   useRoutes([
@@ -21,7 +23,14 @@ const Router = () =>
           children: [
             { element: <ListingPage />, index: true },
             { path: "listings/:id", element: <ListingDetail /> },
-            { path: "/profile", element: <Profile /> }
+            {
+              path: "bookings/",
+              children: [
+                { element: <Booking />, index: true },
+                { element: <BookingPayment />, path: "book/:id" },
+              ],
+            },
+            { path: "/profile", element: <Profile /> },
           ],
         },
         {
