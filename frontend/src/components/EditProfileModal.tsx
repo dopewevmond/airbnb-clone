@@ -1,7 +1,6 @@
 import { Modal, Button } from "react-bootstrap";
 import { Formik, Form, Field } from "formik";
 import * as yup from "yup";
-import Loader from "../components/Loader/Loader";
 import { useAppSelector } from "../redux/store";
 import { selectProfile, updateProfile } from "../redux/profileSlice";
 import { useAppDispatch } from "../redux/store";
@@ -148,7 +147,7 @@ const EditProfileModal = ({ closeModal }: Props) => {
                 className="btn btn-primary btn-block w-100 d-flex align-items-center justify-content-center"
                 disabled={isSubmitting}
               >
-                {isSubmitting ? <Loader /> : "Save changes"}
+                Save changes
               </button>
             </Form>
           )}

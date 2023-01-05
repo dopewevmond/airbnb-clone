@@ -1,21 +1,17 @@
-import "./Navbar.scss";
 import { useState, useContext, useRef, useEffect } from "react";
 import { Container, Navbar, ListGroup } from "react-bootstrap";
 import { Link } from "react-router-dom";
 
-import { AuthContext } from "../../context/AuthContext";
-import { AvatarIcon, HamburgerIcon, SearchIcon } from "../Icons";
-import { Logo } from "../Logo";
+import { AuthContext } from "../context/AuthContext";
+import { AvatarIcon, HamburgerIcon, SearchIcon } from "./Icons";
+import { Logo } from "./Logo";
+import { navBarHeight } from "../utils/constants";
 
-type Props = {
-  role?: string;
-};
-
-export const NavBar = ({ role }: Props) => {
+export const NavBar = () => {
   const dropdownRef = useRef<any>();
   const [isDropdownOpen, setDropdownOpen] = useState(false);
   const [isHoverDropdown, setHoverDropdown] = useState(false);
-  const { email, logout, isLoggedIn } = useContext(AuthContext);
+  const { email, logout, isLoggedIn, role } = useContext(AuthContext);
   useEffect(() => {
     const handleClickOutside = (event: any) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
@@ -39,33 +35,32 @@ export const NavBar = ({ role }: Props) => {
   };
 
   return (
-    <Navbar bg="light" expand="lg">
+    <Navbar bg="light" expand="lg" style={{ height: navBarHeight }}>
       <Container className="position-relative">
         <Link to="/" className="navbar-brand d-none d-md-block">
           <Logo />
         </Link>
 
-        {role !== "host" ? (
-          <div className="mx-auto position-relative" style={{ width: "400px" }}>
-            <input
-              type="text"
-              className="form-control w-100"
-              style={{ borderRadius: "1.2em", backgroundColor: "inherit" }}
-            />
-            <span
-              role="button"
-              className="position-absolute d-flex justify-content-center align-items-center"
-              style={{
-                top: "0.33em",
-                right: "0.4em",
-                backgroundColor: "#ff385c",
-                borderRadius: "1em",
-              }}
-            >
-              <SearchIcon />
-            </span>
-          </div>
-        ) : null}
+        <div className="mx-auto position-relative" style={{ width: "400px" }}>
+          <input
+            type="text"
+            className="form-control w-100"
+            style={{ borderRadius: "1.2em", backgroundColor: "inherit" }}
+          />
+          <span
+            role="button"
+            className="position-absolute d-flex justify-content-center align-items-center"
+            style={{
+              top: "0.33em",
+              right: "0.4em",
+              backgroundColor: "#ff385c",
+              borderRadius: "1em",
+            }}
+          >
+            <SearchIcon />
+          </span>
+        </div>
+
         {isLoggedIn ? (
           <div ref={dropdownRef}>
             <div
@@ -153,7 +148,13 @@ export const NavBar = ({ role }: Props) => {
             </div>
           </div>
         ) : (
-          <Link to="/login" className="btn btn-danger text-decoration-none">Log in</Link>
+          <Link
+            to="/login"
+            replace
+            className="btn btn-danger text-decoration-none"
+          >
+            Log in
+          </Link>
         )}
       </Container>
     </Navbar>

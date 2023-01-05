@@ -109,3 +109,62 @@ export const HouseIcon = () => (
     ></path>
   </svg>
 );
+
+export const SuccessIcon = () => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    width="100"
+    height="100"
+    fill="#000"
+    version="1.1"
+    viewBox="0 0 50 50"
+    xmlSpace="preserve"
+    className="d-block mx-auto"
+  >
+    <g>
+      <circle cx="25" cy="25" r="25" fill="#25AE88"></circle>
+      <path
+        fill="none"
+        stroke="#FFF"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeMiterlimit="10"
+        strokeWidth="2"
+        d="M38 15L22 33 12 25"
+      ></path>
+    </g>
+  </svg>
+);
+
+export const ErrorIcon = () => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    width="100"
+    height="100"
+    fill="#000"
+    version="1.1"
+    viewBox="0 0 50 50"
+    xmlSpace="preserve"
+    className="d-block mx-auto"
+  >
+    <g>
+      <circle cx="25" cy="25" r="25" fill="#D75A4A"></circle>
+      <path
+        fill="none"
+        stroke="#FFF"
+        strokeLinecap="round"
+        strokeMiterlimit="10"
+        strokeWidth="2"
+        d="M16 34L25 25 34 16"
+      ></path>
+      <path
+        fill="none"
+        stroke="#FFF"
+        strokeLinecap="round"
+        strokeMiterlimit="10"
+        strokeWidth="2"
+        d="M16 16L25 25 34 34"
+      ></path>
+    </g>
+  </svg>
+);

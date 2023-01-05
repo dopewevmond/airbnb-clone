@@ -14,8 +14,9 @@ import {
 } from "../redux/profileSlice";
 import { useEffect } from "react";
 import { useAppDispatch } from "../redux/store";
+import { FullPageLoader } from "../components/FullPageLoader";
 
-export const Profile = () => {
+const Profile = () => {
   const { id, role } = useContext(AuthContext);
 
   const dispatch = useAppDispatch();
@@ -32,7 +33,7 @@ export const Profile = () => {
   const [show, setShow] = useState(false);
   const toggleModal = () => setShow(!show);
 
-  if (status === "loading") return <div className="container"> Loading...</div>;
+  if (status === "loading") return <FullPageLoader />;
   if (error != null) return <div className="alert alert-danger">{error}</div>;
   if (profileDetails == null)
     return <div className="container">Profile was not found</div>;
@@ -110,3 +111,5 @@ export const Profile = () => {
     </div>
   );
 };
+
+export default Profile;

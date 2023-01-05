@@ -3,9 +3,8 @@ import * as yup from "yup";
 import { AuthContext } from "../context/AuthContext";
 import { useContext, useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import Loader from "../components/Loader/Loader";
 import { AxiosError } from "axios";
-import { Alert } from "react-bootstrap";
+import { Alert, Spinner } from "react-bootstrap";
 import { useLoginMessage } from "../hooks/useLoginMessage";
 
 interface FormValues {
@@ -132,7 +131,7 @@ const LoginPage = () => {
                         className="btn btn-danger btn-block w-100 d-flex align-items-center justify-content-center"
                         disabled={isSubmitting}
                       >
-                        {isSubmitting ? <Loader /> : "Log in"}
+                        {isSubmitting ? <Spinner className="d-inline-block mx-auto" /> : "Log in"}
                       </button>
                     </Form>
                   )}

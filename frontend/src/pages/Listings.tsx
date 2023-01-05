@@ -1,11 +1,14 @@
 import { Link } from "react-router-dom";
 import { useListings } from "../hooks/useListing";
 import { ListingCard } from "../components/ListingCard";
+import { FullPageLoader } from "../components/FullPageLoader";
+import { useClearLocalStorage } from "../hooks/useClearLocalStorage";
 
 const Listing = () => {
-  const { listings, loading, error } = useListings()
+  const { listings, loading, error } = useListings();
+  useClearLocalStorage();
 
-  if (loading) return <div className="container"> Loading...</div>;
+  if (loading) return <FullPageLoader />;
   if (error != null) return <div className="alert alert-danger">{error}</div>;
   if (listings == null || listings.length === 0)
     return (

@@ -1,24 +1,26 @@
 import { useRoutes } from "react-router-dom";
 import AuthGuard from "./AuthGuard";
-import Home from "../pages/HomeLayout";
+import HomeLayout from "../pages/HomeLayout";
 import LoginPage from "../pages/Login";
 import SignupPage from "../pages/Signup";
-import ListingPage from "../pages/Listing";
+import ListingPage from "../pages/Listings";
+import ListingDetail from "../pages/ListingDetail";
+import Profile from "../pages/Profile";
+import BookingPage from "../pages/Bookings";
+import BookingPaymentPage from "../pages/BookingPayment";
+import BookingDetailModal from "../components/BookingDetailModal";
 import HostGuard from "./HostGuard";
-import HostComponent from "../pages/HostLayout";
-import ListingDetail from "../pages/ListingDetail/ListingDetail";
-import { Profile } from "../pages/Profile";
-import Booking from "../pages/Booking";
-import { BookingPayment } from "../pages/BookingPayment";
 
 const Router = () =>
   useRoutes([
     {
       path: "/",
-      element: <Home />,
+      element: <HomeLayout />,
       children: [
         { element: <ListingPage />, index: true },
         { path: "listings/:id", element: <ListingDetail /> },
+        { path: "login", element: <LoginPage /> },
+        { path: "/signup", element: <SignupPage /> },
       ],
     },
     {
@@ -26,65 +28,33 @@ const Router = () =>
       element: <AuthGuard />,
       children: [
         {
-          element: <Home />,
+          element: <HomeLayout />,
           path: "/",
           children: [
             {
-              path: "bookings",
-              element: <Booking />,
+              path: "bookings/",
+              element: <BookingPage />,
+              children: [
+                { element: null, index: true },
+                { path: ":id", element: <BookingDetailModal /> },
+              ],
             },
             {
               path: "book/:id",
-              element: <BookingPayment />,
+              element: <BookingPaymentPage />,
             },
             {
               path: "profile",
               element: <Profile />,
             },
+            {
+              path: '/hosting',
+              element: <HostGuard />,
+              // children: [{ element }]
+            }
           ],
         },
       ],
-    },
-    // {
-    //   path: "/",
-    //   element: <AuthGuard />,
-    //   children: [
-    //     {
-    //       element: <Home />,
-    //       path: "/",
-    //       children: [
-    //         { element: <ListingPage />, index: true },
-    //         { path: "listings/:id", element: <ListingDetail /> },
-    //         {
-    //           path: "bookings/",
-    //           children: [
-    //             { element: <Booking />, index: true },
-    //             { element: <BookingPayment />, path: "book" },
-    //           ],
-    //         },
-    //         { path: "/profile", element: <Profile /> },
-    //       ],
-    //     },
-    //     {
-    //       path: "/hosting",
-    //       element: <HostGuard />,
-    //       children: [
-    //         {
-    //           element: <HostComponent />,
-    //           path: "/hosting",
-    //           children: [{ element: <ListingPage />, index: true }],
-    //         },
-    //       ],
-    //     },
-    //   ],
-    // },
-    {
-      path: "/login",
-      element: <LoginPage />,
-    },
-    {
-      path: "/signup",
-      element: <SignupPage />,
     },
   ]);
 

@@ -5,6 +5,10 @@ import * as yup from "yup";
 import { useBookingPayment } from "../hooks/useBooking";
 import moment from "moment";
 import { DEFAULT_AVI } from "../utils/constants";
+import { Modal } from "react-bootstrap";
+import { useState } from "react";
+import { PaymentStatusModal } from "../components/PaymentStatusModal";
+import { FullPageLoader } from "../components/FullPageLoader";
 
 interface FormValues {
   cardNumber: string;
@@ -40,21 +44,23 @@ const initialFormValues: FormValues = {
   cvv: "",
 };
 
-export const BookingPayment = () => {
+const BookingPayment = () => {
   const { id } = useParams();
   const { listing, duration, checkInDate, checkOutDate, loading, error } =
     useBookingPayment(Number(id as string));
+  const [show, setShow] = useState(false);
 
-  const handleSubmit = async (
-    setSubmitting: (isSubmitting: boolean) => void
-  ) => {
-    console.log("submitted");
-    setSubmitting(false);
+  const toggleModal = () => {
+    setShow(!show);
+  };
+  const handleSubmit = async () => {
+    toggleModal();
   };
 
-  if (loading) return <div className="container"> Loading...</div>;
+  if (loading) return <FullPageLoader />;
   if (error != null) return <div className="alert alert-danger">{error}</div>;
   if (
+    id == null ||
     listing == null ||
     duration == null ||
     checkInDate == null ||
@@ -65,7 +71,7 @@ export const BookingPayment = () => {
     );
 
   return (
-    <div className="container pt-4">
+    <div className="container pt-4 mb-4">
       <p className="display-6">
         <Link to={`/listings/${id}`} className="text-decoration-none text-body">
           <span style={{ marginRight: "0.6em" }} className="d-inline-block">
@@ -119,10 +125,7 @@ export const BookingPayment = () => {
           <Formik
             initialValues={initialFormValues}
             validationSchema={formValidationSchema}
-            onSubmit={(values, { setSubmitting }) => {
-              console.log(values);
-              handleSubmit(setSubmitting);
-            }}
+            onSubmit={handleSubmit}
           >
             {({ touched, errors, isSubmitting }) => (
               <Form>
@@ -193,7 +196,11 @@ export const BookingPayment = () => {
                     </div>
                   </div>
                 </div>
-                <button type="submit" className="btn btn-danger w-100">
+                <button
+                  type="submit"
+                  className="btn btn-danger w-100"
+                  disabled={isSubmitting}
+                >
                   Confirm and pay {"$" + listing.night_rate * duration + ".00"}
                 </button>
               </Form>
@@ -201,6 +208,21 @@ export const BookingPayment = () => {
           </Formik>
         </div>
       </div>
+
+      <Modal
+        show={show}
+        onHide={toggleModal}
+        backdrop="static"
+        keyboard={false}
+      >
+        <PaymentStatusModal
+          checkIn={checkInDate}
+          checkOut={checkOutDate}
+          listingId={Number(id)}
+        />
+      </Modal>
     </div>
   );
 };
+
+export default BookingPayment

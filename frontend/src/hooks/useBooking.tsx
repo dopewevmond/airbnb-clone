@@ -1,8 +1,9 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import { AxiosError } from "axios";
 import { useEffect, useState } from "react";
 import { IBooking, IListingDetail } from "../interfaces";
 import axiosInstance from "../utils/axiosInstance";
-import { useSearchParams } from "react-router-dom";
+import { useParams, useSearchParams } from "react-router-dom";
 import moment from "moment";
 
 interface ListingsResponse {
@@ -10,13 +11,22 @@ interface ListingsResponse {
 }
 
 export const useBookings = () => {
+  const { id } = useParams();
   const [bookings, setBookings] = useState<IBooking[] | null>(null);
-  const [loading, setLoading] = useState(false);
+  const [booking, setBooking] = useState<IBooking|null>(null);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     fetchBookings();
   }, []);
+
+  useEffect(() => {
+    if (Boolean(id)) {
+      const bk = bookings?.find((booking) => booking.id === Number(id))
+      setBooking(bk ? bk : null);
+    }
+  }, [id, bookings]);
 
   const fetchBookings = async () => {
     setLoading(true);
@@ -26,6 +36,7 @@ export const useBookings = () => {
         url: "/bookings",
       });
       setBookings(data.bookings);
+      console.log(data.bookings);
       setLoading(false);
     } catch (err: any) {
       const { response } = err as AxiosError<{ message?: string }>;
@@ -37,7 +48,7 @@ export const useBookings = () => {
     }
   };
 
-  return { bookings, loading, error };
+  return { bookings, booking, loading, error };
 };
 
 export const useBookingPayment = (id: number) => {
@@ -46,8 +57,8 @@ export const useBookingPayment = (id: number) => {
   const [error, setError] = useState<string | null>(null);
 
   const [searchParams] = useSearchParams();
-  const checkInDate = searchParams.get("checkInDate")
-  const checkOutDate = searchParams.get("checkOutDate")
+  const checkInDate = searchParams.get("checkInDate");
+  const checkOutDate = searchParams.get("checkOutDate");
 
   const [duration, setDuration] = useState<number | null>(null);
 
@@ -84,4 +95,39 @@ export const useBookingPayment = (id: number) => {
   };
 
   return { listing, duration, checkInDate, checkOutDate, loading, error };
+};
+
+export const useMakeBooking = (
+  listingId: number,
+  checkIn: string,
+  checkOut: string
+) => {
+  const [bookingId, setBookingId] = useState<number | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    book();
+  }, []);
+
+  const book = async () => {
+    setLoading(true);
+    try {
+      const { data } = await axiosInstance.post<{ id: number }>("/bookings", {
+        listingId,
+        startDate: checkIn,
+        endDate: checkOut,
+      });
+      setBookingId(data.id);
+      setLoading(false);
+    } catch (err: any) {
+      const { response } = err as AxiosError<{ message?: string }>;
+      setError(
+        response?.data.message ?? "An error occurred while booking the listing"
+      );
+      setLoading(false);
+    }
+  };
+
+  return { bookingId, loading, error };
 };

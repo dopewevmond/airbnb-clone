@@ -71,17 +71,20 @@ const BookingForm = ({ id, night_rate, min_nights_stay }: Props) => {
 
       <button
         onClick={() => {
-          const urlParams = (range) ? new URLSearchParams({
-            checkInDate: range[0].toISOString(),
-            checkOutDate: range[1].toISOString()
-          }) : new URLSearchParams({})
-          
+          const urlParams = range
+            ? new URLSearchParams({
+                checkInDate: range[0].toISOString(),
+                checkOutDate: range[1].toISOString(),
+              })
+            : new URLSearchParams({});
+
           navigate({
             pathname: `/book/${id}`,
-            search: `?${createSearchParams(urlParams)}`
+            search: `?${createSearchParams(urlParams)}`,
           });
         }}
-        className="btn btn-danger w-100 d-block cs-button"
+        style={{ backgroundColor: "rgb(255, 56, 92)" }}
+        className="btn btn-danger w-100 d-block"
         disabled={duration == null || duration < min_nights_stay}
       >
         Book

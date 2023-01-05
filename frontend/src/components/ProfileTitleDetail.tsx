@@ -11,7 +11,7 @@ const ProfileTitleDetail = ({
 }: Props) => (
   <div className="row mb-3">
     <div className="col-12">
-      <span style={{ fontWeight: "500", fontSize: "1.3em", lineHeight: 1.2 }}>
+      <span className="fs-4 lh-lg" style={{ fontWeight: '500' }}>
         {title}
       </span>
     </div>
