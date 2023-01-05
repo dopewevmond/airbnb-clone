@@ -1,15 +1,13 @@
 import { AxiosError } from "axios";
 import { useEffect, useState } from "react";
 import { IListing, IListingDetail, IReview } from "../interfaces";
-
-import useAxios from "./useAxios";
+import axiosInstance from "../utils/axiosInstance";
 
 interface ListingsResponse {
   listings: IListing[];
 }
 
 export const useListings = () => {
-  const { axiosAuthInstance } = useAxios();
   const [listings, setListings] = useState<IListing[] | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -20,9 +18,10 @@ export const useListings = () => {
   }, []);
 
   const fetchListings = async () => {
+    delete axiosInstance.defaults.headers.common["Authorization"];
     setLoading(true);
     try {
-      const { data } = await axiosAuthInstance<ListingsResponse>({
+      const { data } = await axiosInstance<ListingsResponse>({
         method: "GET",
         url: "/listings",
       });
@@ -42,7 +41,6 @@ export const useListings = () => {
 };
 
 export const useListingDetails = (id: number) => {
-  const { axiosAuthInstance } = useAxios();
   const [listingDetails, setListingDetails] = useState<IListingDetail | null>(
     null
   );
@@ -54,12 +52,11 @@ export const useListingDetails = (id: number) => {
   }, []);
 
   const fetchListingDetails = async () => {
+    delete axiosInstance.defaults.headers.common["Authorization"];
     setLoading(true);
 
-    const listingDetails = axiosAuthInstance.get<IListingDetail>(
-      `/listings/${id}`
-    );
-    const listingReviews = axiosAuthInstance.get<{ reviews: IReview[] }>(
+    const listingDetails = axiosInstance.get<IListingDetail>(`/listings/${id}`);
+    const listingReviews = axiosInstance.get<{ reviews: IReview[] }>(
       `/reviews/listings/${id}`
     );
     Promise.all([listingDetails, listingReviews])

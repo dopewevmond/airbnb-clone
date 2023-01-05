@@ -15,10 +15,10 @@ export const NavBar = ({ role }: Props) => {
   const dropdownRef = useRef<any>();
   const [isDropdownOpen, setDropdownOpen] = useState(false);
   const [isHoverDropdown, setHoverDropdown] = useState(false);
-  const { email, logout } = useContext(AuthContext);
+  const { email, logout, isLoggedIn } = useContext(AuthContext);
   useEffect(() => {
     const handleClickOutside = (event: any) => {
-      if (!dropdownRef.current.contains(event.target)) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
         setDropdownOpen(false);
       }
     };
@@ -66,91 +66,95 @@ export const NavBar = ({ role }: Props) => {
             </span>
           </div>
         ) : null}
-        <div ref={dropdownRef}>
-          <div
-            onMouseEnter={handleMouseEnter}
-            onMouseLeave={handleMouseLeave}
-            onClick={toggleDropdown}
-            role="button"
-            className="d-none d-md-flex align-items-center"
-            style={{
-              gap: "0.5em",
-              padding: "0.5em 0.7em",
-              boxShadow: isHoverDropdown ? "0 2px 4px rgba(0,0,0,0.18)" : "",
-              border: "1px solid #DDDDDD",
-              borderRadius: "1.5em",
-            }}
-          >
-            <span>
-              <HamburgerIcon />
-            </span>
-            <span className="mr-2">
-              <AvatarIcon />
-            </span>
-          </div>
-          <div
-            className="position-absolute"
-            style={{
-              display: isDropdownOpen ? "block" : "none",
-              zIndex: "1",
-              right: "1em",
-              top: "3em",
-            }}
-          >
-            <ListGroup style={{ fontSize: "0.7em" }}>
-              <ListGroup.Item>
-                Signed in as: <br /> <strong>{email}</strong>
-              </ListGroup.Item>
-              <ListGroup.Item className="gray-bg-on-hover">
-                <Link
-                  onClick={toggleDropdown}
-                  to="/profile"
-                  className="d-block w-100 text-decoration-none text-reset"
-                >
-                  Profile
-                </Link>
-              </ListGroup.Item>
-              {role === "host" ? (
-                <>
-                  <ListGroup.Item
-                    className="gray-bg-on-hover"
-                    role="button"
-                    disabled
+        {isLoggedIn ? (
+          <div ref={dropdownRef}>
+            <div
+              onMouseEnter={handleMouseEnter}
+              onMouseLeave={handleMouseLeave}
+              onClick={toggleDropdown}
+              role="button"
+              className="d-none d-md-flex align-items-center"
+              style={{
+                gap: "0.5em",
+                padding: "0.5em 0.7em",
+                boxShadow: isHoverDropdown ? "0 2px 4px rgba(0,0,0,0.18)" : "",
+                border: "1px solid #DDDDDD",
+                borderRadius: "1.5em",
+              }}
+            >
+              <span>
+                <HamburgerIcon />
+              </span>
+              <span className="mr-2">
+                <AvatarIcon />
+              </span>
+            </div>
+            <div
+              className="position-absolute"
+              style={{
+                display: isDropdownOpen ? "block" : "none",
+                zIndex: "1",
+                right: "1em",
+                top: "3em",
+              }}
+            >
+              <ListGroup style={{ fontSize: "0.7em" }}>
+                <ListGroup.Item>
+                  Signed in as: <br /> <strong>{email}</strong>
+                </ListGroup.Item>
+                <ListGroup.Item className="gray-bg-on-hover">
+                  <Link
+                    onClick={toggleDropdown}
+                    to="/profile"
+                    className="d-block w-100 text-decoration-none text-reset"
                   >
-                    Listings
-                  </ListGroup.Item>
-                  <ListGroup.Item
-                    className="gray-bg-on-hover"
-                    role="button"
-                    disabled
-                  >
-                    Reviews
-                  </ListGroup.Item>
-                </>
-              ) : (
-                <>
-                  <ListGroup.Item className="gray-bg-on-hover">
-                    <Link
-                      onClick={toggleDropdown}
-                      to="/bookings"
-                      className="d-block w-100 text-decoration-none text-reset"
+                    Profile
+                  </Link>
+                </ListGroup.Item>
+                {role === "host" ? (
+                  <>
+                    <ListGroup.Item
+                      className="gray-bg-on-hover"
+                      role="button"
+                      disabled
                     >
-                      Bookings
-                    </Link>
-                  </ListGroup.Item>
-                </>
-              )}
+                      Listings
+                    </ListGroup.Item>
+                    <ListGroup.Item
+                      className="gray-bg-on-hover"
+                      role="button"
+                      disabled
+                    >
+                      Reviews
+                    </ListGroup.Item>
+                  </>
+                ) : (
+                  <>
+                    <ListGroup.Item className="gray-bg-on-hover">
+                      <Link
+                        onClick={toggleDropdown}
+                        to="/bookings"
+                        className="d-block w-100 text-decoration-none text-reset"
+                      >
+                        Bookings
+                      </Link>
+                    </ListGroup.Item>
+                  </>
+                )}
 
-              <ListGroup.Item
-                role="button"
-                onClick={logout}
-                className="gray-bg-on-hover"
-              >
-                Log out
-              </ListGroup.Item>
-            </ListGroup>
+                <ListGroup.Item
+                  role="button"
+                  onClick={logout}
+                  className="gray-bg-on-hover"
+                >
+                  Log out
+                </ListGroup.Item>
+              </ListGroup>
+            </div>
           </div>
-        </div>
+        ) : (
+          <Link to="/login" className="btn btn-danger text-decoration-none">Log in</Link>
+        )}
       </Container>
     </Navbar>
   );

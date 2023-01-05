@@ -2,29 +2,37 @@ import { useContext, useState } from "react";
 import moment from "moment";
 import { Modal } from "react-bootstrap";
 import { useAppSelector } from "../redux/store";
-
 import { AuthContext } from "../context/AuthContext";
-import { useProfileInfo } from "../hooks/useProfile";
 import { DEFAULT_AVI } from "../utils/constants";
 import ProfileTitleDetail from "../components/ProfileTitleDetail";
 import EditProfileModal from "../components/EditProfileModal";
 import {
+  fetchProfile,
   selectProfile,
   selectProfileError,
-  selectProfileLoading,
+  selectProfileStatus,
 } from "../redux/profileSlice";
+import { useEffect } from "react";
+import { useAppDispatch } from "../redux/store";
 
 export const Profile = () => {
   const { id, role } = useContext(AuthContext);
-  useProfileInfo(id as number);
+
+  const dispatch = useAppDispatch();
   const profileDetails = useAppSelector(selectProfile);
-  const loading = useAppSelector(selectProfileLoading);
+  const status = useAppSelector(selectProfileStatus);
   const error = useAppSelector(selectProfileError);
+
+  useEffect(() => {
+    if (status === "idle") {
+      dispatch(fetchProfile(Number(id)));
+    }
+  }, [id]);
 
   const [show, setShow] = useState(false);
   const toggleModal = () => setShow(!show);
 
-  if (loading) return <div className="container"> Loading...</div>;
+  if (status === "loading") return <div className="container"> Loading...</div>;
   if (error != null) return <div className="alert alert-danger">{error}</div>;
   if (profileDetails == null)
     return <div className="container">Profile was not found</div>;

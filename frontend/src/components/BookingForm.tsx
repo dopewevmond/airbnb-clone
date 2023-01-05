@@ -8,7 +8,7 @@ import {
   selectDuration,
 } from "../redux/bookingSlice";
 import { useAppDispatch, useAppSelector } from "../redux/store";
-import { useNavigate } from "react-router-dom";
+import { createSearchParams, useNavigate } from "react-router-dom";
 
 type Props = {
   id: number;
@@ -71,7 +71,15 @@ const BookingForm = ({ id, night_rate, min_nights_stay }: Props) => {
 
       <button
         onClick={() => {
-          navigate(`/bookings/book/${id}`);
+          const urlParams = (range) ? new URLSearchParams({
+            checkInDate: range[0].toISOString(),
+            checkOutDate: range[1].toISOString()
+          }) : new URLSearchParams({})
+          
+          navigate({
+            pathname: `/book/${id}`,
+            search: `?${createSearchParams(urlParams)}`
+          });
         }}
         className="btn btn-danger w-100 d-block cs-button"
         disabled={duration == null || duration < min_nights_stay}

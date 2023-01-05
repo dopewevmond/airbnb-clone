@@ -1,11 +1,12 @@
 import { Formik, Form, Field } from "formik";
 import * as yup from "yup";
 import { AuthContext } from "../context/AuthContext";
-import { useContext, useState } from "react";
+import { useContext, useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import Loader from "../components/Loader/Loader";
 import { AxiosError } from "axios";
 import { Alert } from "react-bootstrap";
+import { useLoginMessage } from "../hooks/useLoginMessage";
 
 interface FormValues {
   email: string;
@@ -29,8 +30,12 @@ const initialFormValues: FormValues = {
 };
 
 const LoginPage = () => {
-  const { login } = useContext(AuthContext);
+  const { login, setLoggedIn } = useContext(AuthContext);
   const [error, setError] = useState<string | null>(null);
+  const { loginMessage } = useLoginMessage();
+  useEffect(() => {
+    setLoggedIn(false);
+  }, []);
 
   const handleSubmit = async (
     { email, password }: FormValues,
@@ -38,11 +43,9 @@ const LoginPage = () => {
   ) => {
     try {
       await login(email, password);
-    } catch (err) {
+    } catch (err: any) {
       const { response } = err as AxiosError<{ message: string }>;
-      setError(
-        response?.data.message ?? "An error occurred while logging in"
-      );
+      setError(response?.data.message ?? err);
       setSubmitting(false);
     }
   };
@@ -59,6 +62,13 @@ const LoginPage = () => {
                 {error ? (
                   <Alert variant="danger">
                     <span> {error} </span>
+                  </Alert>
+                ) : (
+                  <></>
+                )}
+                {loginMessage ? (
+                  <Alert variant="danger">
+                    <span> {loginMessage} </span>
                   </Alert>
                 ) : (
                   <></>

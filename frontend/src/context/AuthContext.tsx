@@ -1,9 +1,10 @@
 import { FC, createContext, useState, ReactNode } from "react";
-import { BASE_URL } from "../utils/constants";
+import { BASE_URL, redirectParamsKey, redirectToKey } from "../utils/constants";
 import jwtDecode from "jwt-decode";
-import { useNavigate } from "react-router-dom";
-import axios, { AxiosError } from "axios";
+import { useNavigate, useLocation } from "react-router-dom";
+import axios from "axios";
 import { clearUserData, getUserData, setUserData } from "../utils/authHelper";
+import axiosInstance from "../utils/axiosInstance";
 
 export interface User {
   id: number | null;
@@ -14,10 +15,9 @@ export interface User {
 interface Props {
   children?: ReactNode;
 }
-interface IAuthContext extends User {
+interface IAuthContext extends Omit<User, "accessToken"> {
   isLoggedIn: boolean;
-  // loading: boolean; // makes the authguard hold on while localstorage is checked for token
-  setAccessToken: (accessToken: string) => void;
+  setLoggedIn: (status: boolean) => void;
   login: (email: string, password: string) => Promise<void>;
   signup: (
     firstName: string,
@@ -31,16 +31,10 @@ const initialAuthContext: IAuthContext = {
   isLoggedIn: Boolean(getUserData()?.accessToken) ?? false,
   id: getUserData()?.id ?? null,
   email: getUserData()?.email ?? null,
-  accessToken: getUserData()?.accessToken ?? null,
   role: getUserData()?.role ?? null,
-  setAccessToken: () => {},
-  login: (email: string, password: string) => Promise.resolve(),
-  signup: (
-    firstName: string,
-    lastName: string,
-    email: string,
-    password: string
-  ) => Promise.resolve(),
+  setLoggedIn: () => {},
+  login: () => Promise.resolve(),
+  signup: () => Promise.resolve(),
   logout: () => Promise.resolve(),
 };
 
@@ -51,7 +45,7 @@ export interface LoginApiResponse {
   refreshToken: string;
 }
 export interface IDecodedJWT {
-  id: number,
+  id: number;
   email: string;
   role: string;
   token_id: string;
@@ -59,18 +53,17 @@ export interface IDecodedJWT {
 
 const AuthContextProvider: FC<Props> = ({ children }) => {
   const navigate = useNavigate();
-  const [id, setId] = useState<number|null>(initialAuthContext.id)
+  const [id, setId] = useState<number | null>(initialAuthContext.id);
   const [email, setEmail] = useState<string | null>(initialAuthContext.email);
   const [role, setRole] = useState<string | null>(initialAuthContext.role);
   const [isLoggedIn, setLoggedIn] = useState(initialAuthContext.isLoggedIn);
-  const [accessToken, setAccessToken] = useState<string | null>(initialAuthContext.accessToken);
+  const location = useLocation();
 
   const login = async (email: string, password: string): Promise<void> => {
     setEmail(null);
     setRole(null);
-    setAccessToken(null);
     setLoggedIn(false);
-    setId(null)
+    setId(null);
     const { data } = await axios.post<LoginApiResponse>(
       `${BASE_URL}/auth/login`,
       { email, password }
@@ -78,40 +71,29 @@ const AuthContextProvider: FC<Props> = ({ children }) => {
     const jwtInfo = jwtDecode(data.accessToken) as IDecodedJWT;
     setEmail(jwtInfo.email);
     setRole(jwtInfo.role);
-    setId(jwtInfo.id)
-    setAccessToken(data.accessToken);
+    setId(jwtInfo.id);
     setLoggedIn(true);
     setUserData(data.accessToken, data.refreshToken); // storing auth data in localStorage
-    if (jwtInfo.role === "host") {
-      navigate("/hosting");
-    } else {
-      navigate("/");
+    let redirectPath = "/";
+    const redirect_to = localStorage.getItem(redirectToKey);
+    const params = localStorage.getItem(redirectParamsKey);
+    if (redirect_to != null) {
+      redirectPath = redirect_to;
     }
+    if (params != null) {
+      redirectPath += params;
+    }
+    navigate(redirectPath);
   };
 
-  const axiosLogout = axios.create({
-    baseURL: BASE_URL,
-    headers: {
-      Authorization: `Bearer ${accessToken}`,
-    },
-  });
-  axiosLogout.interceptors.response.use(
-    (response) => {
-      return Promise.resolve(response);
-    },
-    async (error) => {
-      const { response } = error as AxiosError<{ message?: string }>;
-      if (response?.data.message === ("jwt expired" || "unauthorized")) {
-        return Promise.reject({ message: "User already logged out" });
-      }
-      return Promise.reject(error);
-    }
-  );
-
   const logout = async () => {
+    delete axiosInstance.defaults.headers.common["Authorization"];
     setLoggedIn(false);
+    setEmail(null);
+    setRole(null);
+    setId(null);
     clearUserData(); // removes auth data from localStorage
-    await axiosLogout({ method: "POST", url: "/auth/logout" });
+    navigate("/");
   };
 
   const signup = async (
@@ -122,9 +104,8 @@ const AuthContextProvider: FC<Props> = ({ children }) => {
   ) => {
     setEmail(null);
     setRole(null);
-    setAccessToken(null);
     setLoggedIn(false);
-    setId(null)
+    setId(null);
     await axios.post(`${BASE_URL}/auth/signup`, {
       firstName,
       lastName,
@@ -141,8 +122,7 @@ const AuthContextProvider: FC<Props> = ({ children }) => {
         email,
         role,
         isLoggedIn,
-        accessToken,
-        setAccessToken,
+        setLoggedIn,
         login,
         signup,
         logout,

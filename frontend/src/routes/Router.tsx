@@ -15,37 +15,69 @@ const Router = () =>
   useRoutes([
     {
       path: "/",
+      element: <Home />,
+      children: [
+        { element: <ListingPage />, index: true },
+        { path: "listings/:id", element: <ListingDetail /> },
+      ],
+    },
+    {
+      path: "/",
       element: <AuthGuard />,
       children: [
         {
           element: <Home />,
           path: "/",
           children: [
-            { element: <ListingPage />, index: true },
-            { path: "listings/:id", element: <ListingDetail /> },
             {
-              path: "bookings/",
-              children: [
-                { element: <Booking />, index: true },
-                { element: <BookingPayment />, path: "book/:id" },
-              ],
+              path: "bookings",
+              element: <Booking />,
             },
-            { path: "/profile", element: <Profile /> },
-          ],
-        },
-        {
-          path: "/hosting",
-          element: <HostGuard />,
-          children: [
             {
-              element: <HostComponent />,
-              path: "/hosting",
-              children: [{ element: <ListingPage />, index: true }],
+              path: "book/:id",
+              element: <BookingPayment />,
+            },
+            {
+              path: "profile",
+              element: <Profile />,
             },
           ],
         },
       ],
     },
+    // {
+    //   path: "/",
+    //   element: <AuthGuard />,
+    //   children: [
+    //     {
+    //       element: <Home />,
+    //       path: "/",
+    //       children: [
+    //         { element: <ListingPage />, index: true },
+    //         { path: "listings/:id", element: <ListingDetail /> },
+    //         {
+    //           path: "bookings/",
+    //           children: [
+    //             { element: <Booking />, index: true },
+    //             { element: <BookingPayment />, path: "book" },
+    //           ],
+    //         },
+    //         { path: "/profile", element: <Profile /> },
+    //       ],
+    //     },
+    //     {
+    //       path: "/hosting",
+    //       element: <HostGuard />,
+    //       children: [
+    //         {
+    //           element: <HostComponent />,
+    //           path: "/hosting",
+    //           children: [{ element: <ListingPage />, index: true }],
+    //         },
+    //       ],
+    //     },
+    //   ],
+    // },
     {
       path: "/login",
       element: <LoginPage />,

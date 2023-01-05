@@ -3,8 +3,8 @@ import { Formik, Form, Field } from "formik";
 import * as yup from "yup";
 import Loader from "../components/Loader/Loader";
 import { useAppSelector } from "../redux/store";
-import { selectProfile } from "../redux/profileSlice";
-import { useUpdateProfileDetails } from "../hooks/useProfile";
+import { selectProfile, updateProfile } from "../redux/profileSlice";
+import { useAppDispatch } from "../redux/store";
 
 type Props = {
   closeModal: () => void;
@@ -35,7 +35,7 @@ const formValidationSchema = yup.object().shape({
 
 const EditProfileModal = ({ closeModal }: Props) => {
   const profileDetails = useAppSelector(selectProfile);
-  const updateProfile = useUpdateProfileDetails();
+  const dispatch = useAppDispatch();
 
   const initialFormValues: FormValues = {
     firstName: profileDetails?.first_name ?? "",
@@ -45,7 +45,7 @@ const EditProfileModal = ({ closeModal }: Props) => {
   };
 
   const handleSubmit = async (values: FormValues) => {
-    await updateProfile(values);
+    dispatch(updateProfile(values));
     closeModal();
   };
 
