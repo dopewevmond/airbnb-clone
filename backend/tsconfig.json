@@ -3,7 +3,7 @@
       "target": "ES6",
       "module": "CommonJS",                                 
       "sourceMap": false,
-      "outDir": "./public",
+      "outDir": "./dist",
       "noImplicitAny": true,
       "strictNullChecks": true,             
       "noImplicitThis": true,
