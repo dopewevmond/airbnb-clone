@@ -37,6 +37,7 @@ class ListingController implements Controller {
 
   private setupRoutes (): void {
     this.router.get(this.path, tryCatchWrapper(this.GetListings))
+    this.router.get(`${this.path}/owned`, authenticateJWT, checkHost, tryCatchWrapper(this.GetOwnedListings))
     this.router.get(`${this.path}/:id`, validateInputs(IdSchema), tryCatchWrapper(this.GetOneListing))
     this.router.post(this.path, authenticateJWT, checkHost, validateInputs(ListingSchema), tryCatchWrapper(this.AddListing))
     this.router.patch(`${this.path}/:id`, authenticateJWT, checkHost, validateInputs(ListingSchema), tryCatchWrapper(this.EditListing))
@@ -46,14 +47,19 @@ class ListingController implements Controller {
     this.router.post(`${this.path}/:id/rooms`, authenticateJWT, checkHost, validateInputs(RoomSchema), tryCatchWrapper(this.AddRoomToListing))
   }
 
+  private async GetOwnedListings (req: Request, res: Response, next: NextFunction): Promise<void> {
+    const listings = await listingRepository.find({ where: { owner: { id: Number(res.locals.user?.id) } }, relations: { photos: { photo: true } } })
+    res.json({ listings })
+  }
+
   private async GetListings (req: Request, res: Response, next: NextFunction): Promise<void> {
-    const listings = await listingRepository.find({ relations: { owner: true, photos: { photo: true }, amenities: true, rooms: true } })
+    const listings = await listingRepository.find({ where: { is_accepting_bookings: true }, relations: { owner: true, photos: { photo: true }, amenities: true, rooms: true } })
     res.json({ listings })
   }
 
   private async GetOneListing (req: Request, res: Response, next: NextFunction): Promise<void> {
     const { id } = req.params
-    const listing = await listingRepository.findOne({ where: { id: parseInt(id) }, relations: { owner: true, photos: { photo: true }, amenities: true, rooms: true } })
+    const listing = await listingRepository.findOne({ where: { id: parseInt(id), is_accepting_bookings: true }, relations: { owner: true, photos: { photo: true }, amenities: true, rooms: true } })
     if (listing == null) {
       return next(new NotFoundException('listing', 'id', id))
     }
@@ -92,6 +98,7 @@ class ListingController implements Controller {
       allowsPets, allowsSmoking, allowsEvents, hasWashingMachine, hasTv, hasWifi, hasWorkspace,
       hasKitchen, hasFreeParking, hasSecurityCam, hasAirConditioning, hasSmokeAlarm
     } = req.body
+    listing.is_accepting_bookings = true
     const amenitySet = amenityRepository.create({
       allows_pets: allowsPets,
       allows_smoking: allowsSmoking,
@@ -179,6 +186,7 @@ class ListingController implements Controller {
 
   private async AddListing (req: Request, res: Response, next: NextFunction): Promise<void> {
     const {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       name, description, isAcceptingBookings, address, street, city, state, country, region, listingType, isFullyPrivate,
       minNightsStay, numBathrooms, maxNumGuests, nightlyRate, timeCheckIn, timeCheckOut
     } = req.body
@@ -205,7 +213,7 @@ class ListingController implements Controller {
       max_num_guests: maxNumGuests,
       created_at: new Date(),
       night_rate: nightlyRate,
-      is_accepting_bookings: isAcceptingBookings,
+      is_accepting_bookings: false,
       time_check_in: createTimeObject(parseInt(hourCheckIn), parseInt(minuteCheckIn)),
       time_check_out: createTimeObject(parseInt(hourCheckOut), parseInt(minuteCheckOut)),
       owner: listingOwner
