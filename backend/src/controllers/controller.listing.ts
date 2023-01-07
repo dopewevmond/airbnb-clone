@@ -1,31 +1,18 @@
-import Controller from './controller.interface'
 import { Request, Response, NextFunction, Router } from 'express'
+import { UploadApiResponse } from 'cloudinary'
+import * as multer from 'multer'
+import Controller from './controller.interface'
 import tryCatchWrapper from '../utils/util.trycatchwrapper'
 import authenticateJWT from '../middleware/middleware.verifyjwt'
 import BadRequestException from '../exceptions/exception.badrequest'
-import AppDataSource from '../datasource'
-import Listing from '../entities/entity.listing'
-import User from '../entities/entity.user'
 import createTimeObject from '../utils/util.timeobject'
 import HttpException from '../exceptions/exception.http'
 import { uploadImage } from '../utils/util.cloudinary'
-import * as multer from 'multer'
-import ListingPhoto from '../entities/entity.listingphoto'
-import Photo from '../entities/entity.photo'
-import { UploadApiResponse } from 'cloudinary'
-import Amenity from '../entities/entity.amenity'
-import Room from '../entities/entity.room'
 import validateInputs from '../middleware/middleware.validate'
-import { AmenitySchema, IdSchema, ListingSchema, RoomSchema } from '../schema/schema.listing'
 import checkHost from '../middleware/middleware.checkhost'
 import NotFoundException from '../exceptions/exception.notfound'
-
-const listingRepository = AppDataSource.getRepository(Listing)
-const userRepository = AppDataSource.getRepository(User)
-const photoRepository = AppDataSource.getRepository(Photo)
-const listingPhotoRepository = AppDataSource.getRepository(ListingPhoto)
-const amenityRepository = AppDataSource.getRepository(Amenity)
-const roomRepository = AppDataSource.getRepository(Room)
+import { AmenitySchema, IdSchema, ListingSchema, RoomSchema } from '../schema/schema.listing'
+import { listingRepository, roomRepository, amenityRepository, photoRepository, listingPhotoRepository, userRepository } from '../utils/util.repositories'
 
 class ListingController implements Controller {
   public path = '/listings'
@@ -48,19 +35,25 @@ class ListingController implements Controller {
   }
 
   private async GetOwnedListings (req: Request, res: Response, next: NextFunction): Promise<void> {
-    const listings = await listingRepository.find({ where: { owner: { id: Number(res.locals.user?.id) } }, relations: { photos: { photo: true } } })
+    const listings = await listingRepository
+      .find({ where: { owner: { id: Number(res.locals.user?.id) } }, relations: { photos: { photo: true } }, order: { created_at: 'DESC' } })
     res.json({ listings })
   }
 
   private async GetListings (req: Request, res: Response, next: NextFunction): Promise<void> {
-    const listings = await listingRepository.find({ where: { is_accepting_bookings: true }, relations: { owner: true, photos: { photo: true }, amenities: true, rooms: true } })
+    const listings = await listingRepository
+      .find({ where: { is_accepting_bookings: true }, relations: { owner: true, photos: { photo: true }, amenities: true, rooms: true }, order: { created_at: 'DESC' } })
     res.json({ listings })
   }
 
   private async GetOneListing (req: Request, res: Response, next: NextFunction): Promise<void> {
     const { id } = req.params
-    const listing = await listingRepository.findOne({ where: { id: parseInt(id), is_accepting_bookings: true }, relations: { owner: true, photos: { photo: true }, amenities: true, rooms: true } })
+    const listing = await listingRepository.findOne({ where: { id: parseInt(id) }, relations: { owner: true, photos: { photo: true }, amenities: true, rooms: true } })
     if (listing == null) {
+      return next(new NotFoundException('listing', 'id', id))
+    }
+    // if the listing is currently not accepting bookings only the owner can view and edit it
+    if (listing.owner.id !== res.locals.user?.id && !listing.is_accepting_bookings) {
       return next(new NotFoundException('listing', 'id', id))
     }
     res.json({ ...listing })
@@ -68,8 +61,10 @@ class ListingController implements Controller {
 
   private async AddRoomToListing (req: Request, res: Response, next: NextFunction): Promise<void> {
     const { id } = req.params
-    const listing = await listingRepository.findOneOrFail({ where: { id: parseInt(id) }, relations: { owner: true } })
-    const isAllowedToEdit = res.locals.user?.email === listing.owner.email_address
+    const listing = await listingRepository.findOne({ where: { id: parseInt(id) }, relations: { owner: true } })
+    if (listing == null) return next(new BadRequestException('the listing you\'re adding a room to doesn\'t exist'))
+
+    const isAllowedToEdit = res.locals.user?.id === listing.owner.id
     if (!isAllowedToEdit) {
       return next(new HttpException(403, 'You are not authorized to perform this action'))
     }
@@ -86,14 +81,13 @@ class ListingController implements Controller {
 
   private async AddAmenityToListing (req: Request, res: Response, next: NextFunction): Promise<void> {
     const { id } = req.params
-    const listing = await listingRepository.findOneOrFail({ where: { id: parseInt(id) }, relations: { owner: true, amenities: true } })
-    const isAllowedToEdit = res.locals.user?.email === listing.owner.email_address
-    if (!isAllowedToEdit) {
-      return next(new HttpException(403, 'You are not authorized to perform this action'))
-    }
-    if (listing.amenities != null) {
-      return next(new BadRequestException('listing already has amenities. cannot add another set of amenities'))
-    }
+    const listing = await listingRepository.findOne({ where: { id: parseInt(id) }, relations: { owner: true, amenities: true } })
+    if (listing == null) return next(new BadRequestException('the listing you\'re trying to add amenities to doesn\'t exist'))
+
+    const isAllowedToEdit = res.locals.user?.id === listing.owner.id
+    if (!isAllowedToEdit) return next(new HttpException(403, 'You are not authorized to perform this action'))
+    if (listing.amenities != null) return next(new BadRequestException('listing already has amenities. cannot add another set of amenities'))
+
     const {
       allowsPets, allowsSmoking, allowsEvents, hasWashingMachine, hasTv, hasWifi, hasWorkspace,
       hasKitchen, hasFreeParking, hasSecurityCam, hasAirConditioning, hasSmokeAlarm
@@ -115,13 +109,15 @@ class ListingController implements Controller {
       owned_by: listing
     })
     const { id: amenityId } = await amenityRepository.save(amenitySet)
-    res.status(201).json({ message: 'added amenity to listing successfully', id: amenityId })
+    res.status(201).json({ message: 'added amenities to listing successfully', id: amenityId })
   }
 
   private async AddImageToListing (req: Request, res: Response, next: NextFunction): Promise<void> {
     const { id } = req.params
-    const listing = await listingRepository.findOneOrFail({ where: { id: parseInt(id) }, relations: { owner: true } })
-    const isAllowedToEdit = listing.owner.email_address === res.locals.user?.email
+    const listing = await listingRepository.findOne({ where: { id: parseInt(id) }, relations: { owner: true } })
+    if (listing == null) return next(new BadRequestException('The listing to add an image to doesn\'t exist'))
+
+    const isAllowedToEdit = listing.owner.id === res.locals.user?.id
     if (!isAllowedToEdit) {
       return next(new HttpException(403, 'You are not authorized to perform this action'))
     }
@@ -138,8 +134,11 @@ class ListingController implements Controller {
 
   private async DeleteListing (req: Request, res: Response, next: NextFunction): Promise<void> {
     const { id } = req.params
-    const listing = await listingRepository.findOneOrFail({ where: { id: parseInt(id) }, relations: { owner: true } })
-    const isAllowedToEdit = listing.owner.email_address === res.locals.user?.email
+    const listing = await listingRepository.findOne({ where: { id: parseInt(id) }, relations: { owner: true } })
+    if (listing == null) {
+      return next(new NotFoundException('listing', 'id', id))
+    }
+    const isAllowedToEdit = listing.owner.id === res.locals.user?.id
     if (!isAllowedToEdit) {
       return next(new HttpException(403, 'You are not authorized to perform this action'))
     }
@@ -153,7 +152,8 @@ class ListingController implements Controller {
       name, description, isAcceptingBookings, address, street, city, state, country, region,
       listingType, isFullyPrivate, minNightsStay, numBathrooms, maxNumGuests, nightlyRate, timeCheckIn, timeCheckOut
     } = req.body
-    const listing = await listingRepository.findOneOrFail({ where: { id: parseInt(id) }, relations: { owner: true } })
+    const listing = await listingRepository.findOne({ where: { id: parseInt(id) }, relations: { owner: true } })
+    if (listing == null) return next(new BadRequestException('The listing you\'re trying to edit does not exist'))
     const isAllowedToEdit = listing.owner.email_address === res.locals.user?.email
     if (!isAllowedToEdit) {
       return next(new HttpException(403, 'You are not authorized to perform this action'))
@@ -196,7 +196,7 @@ class ListingController implements Controller {
     const timeCheckoutString = timeCheckOut as string
     const [hourCheckOut, minuteCheckOut] = timeCheckoutString.split(':')
 
-    const listingOwner = await userRepository.findOneByOrFail({ email_address: res.locals.user?.email })
+    const listingOwner = await userRepository.findOneByOrFail({ id: parseInt(res.locals.user?.id) })
     const listing = listingRepository.create({
       name,
       description,
@@ -218,8 +218,8 @@ class ListingController implements Controller {
       time_check_out: createTimeObject(parseInt(hourCheckOut), parseInt(minuteCheckOut)),
       owner: listingOwner
     })
-    const { id } = await listingRepository.save(listing)
-    res.json({ message: 'listing created successfully', id })
+    const newListing = await listingRepository.save(listing)
+    res.json({ message: 'listing created successfully', ...newListing })
   }
 }
 

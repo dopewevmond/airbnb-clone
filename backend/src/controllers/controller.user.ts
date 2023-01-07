@@ -1,6 +1,4 @@
 import { Request, Response, NextFunction, Router } from 'express'
-import AppDataSource from '../datasource'
-import User from '../entities/entity.user'
 import BadRequestException from '../exceptions/exception.badrequest'
 import NotFoundException from '../exceptions/exception.notfound'
 import tryCatchWrapper from '../utils/util.trycatchwrapper'
@@ -10,7 +8,7 @@ import validateInputs from '../middleware/middleware.validate'
 import { IdSchema } from '../schema/schema.listing'
 import { EditProfileSchema, OptionalProfileSchema } from '../schema/schema.user'
 
-const userRepository = AppDataSource.getRepository(User)
+import { userRepository } from '../utils/util.repositories'
 
 class UserController implements Controller {
   public path = '/users'
@@ -29,33 +27,32 @@ class UserController implements Controller {
 
   private async GetProfileInfoHandler (req: Request, res: Response, next: NextFunction): Promise<void> {
     const { id } = req.params
-    const fullUserDetails = await userRepository.findOneOrFail({
+    const fullUserDetails = await userRepository.findOne({
       where: { id: parseInt(id) },
       select: ['id', 'first_name', 'last_name', 'email_address', 'bio', 'created_at', 'phone_number', 'created_at', 'native_language', 'secondary_language', 'is_super_host', 'has_verified_email', 'profile_photo']
     })
-    if (fullUserDetails.email_address === res.locals.user?.email) {
+    if (fullUserDetails == null) return next(new NotFoundException('user', 'id', id))
+    if (fullUserDetails.id === res.locals.user?.id) {
       res.json({ user: fullUserDetails })
     } else {
-      const user = await userRepository.findOneOrFail({
+      const user = await userRepository.findOne({
         where: { id: parseInt(id) },
         select: ['first_name', 'created_at', 'native_language', 'secondary_language', 'bio', 'profile_photo', 'is_super_host']
       })
+      if (user == null) return next(new NotFoundException('user', 'id', id))
       res.json({ user })
     }
   }
 
   private async EditProfileHandler (req: Request, res: Response, next: NextFunction): Promise<void> {
     const { firstName, lastName, phoneNumber, nativeLanguage, secondaryLanguage, bio } = req.body
-    const emailOfUserToEditProfile = res.locals.user?.email as string
-    if (emailOfUserToEditProfile == null) {
-      return next(new BadRequestException('could not find email of user to edit'))
-    }
+    const idOfUserToEdit = res.locals.user?.id as string
     const userToEditProfile = await userRepository.findOne({
-      where: { email_address: emailOfUserToEditProfile },
+      where: { id: Number(idOfUserToEdit) },
       select: ['id', 'first_name', 'last_name', 'email_address', 'bio', 'created_at', 'phone_number', 'created_at', 'native_language', 'secondary_language', 'is_super_host', 'has_verified_email', 'profile_photo']
     })
     if (userToEditProfile == null) {
-      return next(new NotFoundException('user', 'email', emailOfUserToEditProfile))
+      return next(new BadRequestException('the user profile you\'re trying to edit does not exist'))
     }
     userToEditProfile.first_name = firstName
     userToEditProfile.last_name = lastName
@@ -69,11 +66,11 @@ class UserController implements Controller {
 
   private async NullifyFieldHandler (req: Request, res: Response, next: NextFunction): Promise<void> {
     const { phoneNumber, secondaryLanguage, bio, profilePhoto } = req.body
-    const emailOfUser = res.locals.user?.email as string
-    if (emailOfUser == null) {
-      return next(new BadRequestException('could not find email of user to edit profile'))
+    const idOfUser = res.locals.user?.id as string
+    if (idOfUser == null) {
+      return next(new BadRequestException('could not find id of user to edit profile'))
     }
-    const userToEditProfile = await userRepository.findOneOrFail({ where: { email_address: emailOfUser } })
+    const userToEditProfile = await userRepository.findOneOrFail({ where: { id: Number(idOfUser) } })
     if (phoneNumber != null) {
       userToEditProfile.phone_number = null
     }

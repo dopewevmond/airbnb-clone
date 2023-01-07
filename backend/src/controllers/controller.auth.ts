@@ -1,12 +1,9 @@
 import { Request, Response, NextFunction, Router } from 'express'
 import * as jwt from 'jsonwebtoken'
-import * as redis from 'redis'
 import * as bcrypt from 'bcrypt'
 import Controller from './controller.interface'
 import IRedisPrefix from '../types/type.redisprefix'
-import AppDataSource from '../datasource'
 import User from '../entities/entity.user'
-import singletonRedisClient from '../redisclient'
 import authenticateJWT from '../middleware/middleware.verifyjwt'
 import tryCatchWrapper from '../utils/util.trycatchwrapper'
 import makeid from '../utils/util.generateid'
@@ -17,14 +14,9 @@ import UserExistsException from '../exceptions/exception.userexists'
 import NotFoundException from '../exceptions/exception.notfound'
 import validateInputs from '../middleware/middleware.validate'
 import { LoginSchema, RefreshSchema, ResetPasswordSchema, ResetRequestSchema, SignupSchema } from '../schema/schema.auth'
-
-const userRepository = AppDataSource.getRepository(User)
-const redisClient: redis.RedisClientType = singletonRedisClient()
-const SECRET = process.env.SECRET as string
-const REFRESH_SECRET = process.env.REFRESH_SECRET as string
-const ACCESS_TOKEN_EXPIRY_TIME = process.env.ACCESS_TOKEN_EXPIRY_TIME as string
-const REFRESH_TOKEN_EXPIRY_TIME = process.env.REFRESH_TOKEN_EXPIRY_TIME as string
-const RESET_TOKEN_EXPIRY_TIME = process.env.RESET_TOKEN_EXPIRY_TIME as string
+import { userRepository } from '../utils/util.repositories'
+import { ACCESS_TOKEN_EXPIRY_TIME, REFRESH_TOKEN_EXPIRY_TIME, RESET_TOKEN_EXPIRY_TIME } from '../utils/util.constants'
+import redisClient from '../redisclient'
 
 class AuthController implements Controller {
   public path = '/auth'
@@ -56,7 +48,7 @@ class AuthController implements Controller {
     }
     const tokenId = makeid()
     const redisPrefix: IRedisPrefix = 'refreshToken-'
-    await redisClient.set(redisPrefix + tokenId, 'exists', { EX: parseInt(REFRESH_TOKEN_EXPIRY_TIME) })
+    await redisClient.set(redisPrefix + tokenId, 'exists', { EX: REFRESH_TOKEN_EXPIRY_TIME })
     const accessToken = signAccessToken(user.id, user.email_address, user.user_role, tokenId)
     const refreshToken = signRefreshToken(user.id, user.email_address, user.user_role, tokenId)
     res.json({ accessToken, refreshToken })
@@ -85,10 +77,10 @@ class AuthController implements Controller {
     if (prevResetTokenObj != null) {
       const deserializedTokenObj = JSON.parse(prevResetTokenObj)
       deserializedTokenObj.token_id = tokenId
-      await redisClient.set(redisPrefix + email, JSON.stringify(deserializedTokenObj), { EX: parseInt(RESET_TOKEN_EXPIRY_TIME) })
+      await redisClient.set(redisPrefix + email, JSON.stringify(deserializedTokenObj), { EX: RESET_TOKEN_EXPIRY_TIME })
     } else {
       const newPasswordResetTokenObj = { token_id: tokenId, email }
-      await redisClient.set(redisPrefix + email, JSON.stringify(newPasswordResetTokenObj), { EX: parseInt(RESET_TOKEN_EXPIRY_TIME) })
+      await redisClient.set(redisPrefix + email, JSON.stringify(newPasswordResetTokenObj), { EX: RESET_TOKEN_EXPIRY_TIME })
     }
     return signPasswordResetToken(email, tokenId)
   }
@@ -108,7 +100,7 @@ class AuthController implements Controller {
     const { token, newPassword } = req.body
     let user: jwt.JwtPayload
     try {
-      user = jwt.verify(token, SECRET) as jwt.JwtPayload
+      user = jwt.verify(token, process.env.SECRET) as jwt.JwtPayload
       const email = user.email as string
       const tokenId = user.token_id as string
       const redisPrefix: IRedisPrefix = 'resetToken-'
@@ -140,7 +132,7 @@ class AuthController implements Controller {
     const { token } = req.body
     let user: jwt.JwtPayload
     try {
-      user = jwt.verify(token, REFRESH_SECRET) as jwt.JwtPayload
+      user = jwt.verify(token, process.env.REFRESH_SECRET) as jwt.JwtPayload
       const oldRefreshTokenId = user.token_id as string
       const redisPrefix: IRedisPrefix = 'refreshToken-'
       const validRefreshToken = await redisClient.get(redisPrefix + oldRefreshTokenId)
@@ -152,7 +144,7 @@ class AuthController implements Controller {
       const refreshToken = signRefreshToken(user.id, user.email, user.role, newTokenId)
       // invalidate the previous refresh token since it has been used
       await redisClient.del(redisPrefix + oldRefreshTokenId)
-      await redisClient.set(redisPrefix + newTokenId, 'exists', { EX: parseInt(REFRESH_TOKEN_EXPIRY_TIME) })
+      await redisClient.set(redisPrefix + newTokenId, 'exists', { EX: REFRESH_TOKEN_EXPIRY_TIME })
       res.json({ accessToken, refreshToken })
     } catch (err) {
       if (err instanceof Error) {
@@ -166,7 +158,7 @@ class AuthController implements Controller {
     const tokenId: string = (res.locals.user?.token_id)
     if (tokenId != null) {
       const redisPrefix: IRedisPrefix = 'loggedOutAccessToken-'
-      await redisClient.set(redisPrefix + tokenId, 'exists', { EX: parseInt(ACCESS_TOKEN_EXPIRY_TIME) })
+      await redisClient.set(redisPrefix + tokenId, 'exists', { EX: ACCESS_TOKEN_EXPIRY_TIME })
     }
     res.json({ message: 'logged out successfully' })
   }

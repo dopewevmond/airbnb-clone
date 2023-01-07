@@ -1,10 +1,9 @@
 import * as redis from 'redis'
 
-let redisClient: redis.RedisClientType
+const redisClient: redis.RedisClientType = redis.createClient({
+  url: process.env.REDIS_URI
+})
 ;(async () => {
-  redisClient = redis.createClient({
-    url: process.env.REDIS_URI as string
-  })
   redisClient.on('error', (error) => {
     console.error(error)
     process.exit()
@@ -17,13 +16,4 @@ let redisClient: redis.RedisClientType
     return process.exit()
   })
 
-function SingletonRedisClient (): Function {
-  const singletonRedisClient = redisClient
-  return function (): redis.RedisClientType {
-    return singletonRedisClient
-  }
-}
-
-const singletonRedisClient = SingletonRedisClient()
-
-export default singletonRedisClient
+export default redisClient

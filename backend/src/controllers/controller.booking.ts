@@ -2,21 +2,14 @@ import Controller from './controller.interface'
 import { Request, Response, NextFunction, Router } from 'express'
 import tryCatchWrapper from '../utils/util.trycatchwrapper'
 import authenticateJWT from '../middleware/middleware.verifyjwt'
-import AppDataSource from '../datasource'
-import Listing from '../entities/entity.listing'
-import User from '../entities/entity.user'
 import validateInputs from '../middleware/middleware.validate'
 import checkHost from '../middleware/middleware.checkhost'
-import Booking from '../entities/entity.booking'
 import { doDatesOverlap, getDurationInDays } from '../utils/util.dateoverlap'
 import BadRequestException from '../exceptions/exception.badrequest'
 import HttpException from '../exceptions/exception.http'
 import { AddBookingSchema, AdmitVisitorSchema, CancelBookingSchema, EditBookingSchema } from '../schema/schema.booking'
 import { Not } from 'typeorm'
-
-const listingRepository = AppDataSource.getRepository(Listing)
-const bookingRepository = AppDataSource.getRepository(Booking)
-const userRepository = AppDataSource.getRepository(User)
+import { listingRepository, bookingRepository, userRepository } from '../utils/util.repositories'
 
 class BookingController implements Controller {
   public path = '/bookings'
@@ -87,8 +80,8 @@ class BookingController implements Controller {
   private async AdmitVisitor (req: Request, res: Response, next: NextFunction): Promise<void> {
     const { id } = req.params
     const { visitedListing } = req.body
-    const booking = await bookingRepository
-      .findOneOrFail({ where: { id: parseInt(id), listing: { owner: { email_address: res.locals.user?.email } } } })
+    const booking = await bookingRepository.findOne({ where: { id: parseInt(id), listing: { owner: { id: res.locals.user?.id } } } })
+    if (booking == null) return next(new BadRequestException('The booking you\'re trying to admit a visitor for doesn\'t exist'))
     booking.visited_listing = visitedListing.toLowerCase() === 'true' || visitedListing === true
     await bookingRepository.save(booking)
     res.json({ message: 'admitted visitor successfully' })
@@ -96,8 +89,12 @@ class BookingController implements Controller {
 
   private async AddBookingHandler (req: Request, res: Response, next: NextFunction): Promise<void> {
     const { listingId, startDate, endDate } = req.body
-    const listing = await listingRepository.findOneOrFail({ where: { id: parseInt(listingId) }, relations: { owner: true } })
-    const user = await userRepository.findOneOrFail({ where: { email_address: res.locals.user?.email } })
+    const listing = await listingRepository.findOne({ where: { id: parseInt(listingId) }, relations: { owner: true } })
+    if (listing == null) return next(new BadRequestException('The listing you\'re trying to book does not exist'))
+
+    const user = await userRepository.findOne({ where: { id: res.locals.user?.id } })
+    if (user == null) return next(new BadRequestException('Unknown user cannot book a listing'))
+
     if (listing.owner.id === user.id) {
       return next(new BadRequestException('you cannot book your own listing'))
     }
@@ -122,14 +119,15 @@ class BookingController implements Controller {
   private async EditBookingHandler (req: Request, res: Response, next: NextFunction): Promise<void> {
     const { bookingId } = req.params
     const { newStartDate, newEndDate } = req.body
-    const booking = await bookingRepository.findOneOrFail({ where: { id: parseInt(bookingId) }, relations: { owner: true, listing: true } })
-    const currentUser = await userRepository.findOneOrFail({ where: { email_address: res.locals.user?.email } })
-    if (booking.owner.id !== currentUser.id) {
-      return next(new HttpException(403, 'You cannot edit a booking which does not belong to you'))
+    const booking = await bookingRepository.findOne({ where: { id: parseInt(bookingId) }, relations: { owner: true, listing: true } })
+    if (booking == null) {
+      return next(new BadRequestException('The booking you\'re trying to edit does not exist'))
     }
-    if (booking.paid_for) {
-      return next(new BadRequestException('you cannot edit a listing which you have already paid for'))
-    }
+    const currentUser = await userRepository.findOneOrFail({ where: { id: res.locals.user?.id } })
+
+    if (booking.owner.id !== currentUser.id) return next(new HttpException(403, 'You cannot edit a booking which does not belong to you'))
+    if (booking.paid_for) return next(new BadRequestException('you cannot edit a booking which you have already paid for'))
+
     const newBookAvailable = await this.isListingAvailable(booking.listing.id, newStartDate, newEndDate, true, parseInt(bookingId))
     if (!newBookAvailable) {
       return next(new BadRequestException('the listing is not available at these selected times'))
@@ -144,36 +142,22 @@ class BookingController implements Controller {
   private async CancelBookingHandler (req: Request, res: Response, next: NextFunction): Promise<void> {
     const { bookingId } = req.params
     const booking = await bookingRepository
-      .findOneOrFail({
-        where:
-      { id: parseInt(bookingId), owner: { email_address: res.locals.user?.email } }
-      })
-    if (booking.paid_for) {
-      return next(new BadRequestException('you cannot cancel a booking which you have paid for'))
-    }
+      .findOne({ where: { id: parseInt(bookingId), owner: { id: res.locals.user?.id } } })
+    if (booking == null) return next(new BadRequestException('The booking you\'re trying to cancel does not exist'))
+    if (booking.paid_for) return next(new BadRequestException('you cannot cancel a booking which you have paid for'))
     await bookingRepository.remove(booking)
     res.json({ message: 'deleted successfully' })
   }
 
   private async GetAllBookings (req: Request, res: Response, next: NextFunction): Promise<void> {
     const bookings = await bookingRepository
-      .find({
-        where:
-      { owner: { email_address: res.locals.user?.email } },
-        relations: { listing: { photos: { photo: true } } },
-        order: { start_date: 'DESC' }
-      })
+      .find({ where: { owner: { id: res.locals.user?.id } }, relations: { listing: { photos: { photo: true } } }, order: { start_date: 'DESC' } })
     res.json({ bookings })
   }
 
   private async GetAllHostedBookings (req: Request, res: Response, next: NextFunction): Promise<void> {
     const bookings = await bookingRepository
-      .find({
-        where:
-      { listing: { owner: { email_address: res.locals.user?.email } } },
-        relations: { owner: true },
-        order: { start_date: 'DESC' }
-      })
+      .find({ where: { listing: { owner: { id: res.locals.user?.id } } }, relations: { owner: true }, order: { start_date: 'DESC' } })
     res.json({ bookings })
   }
 }

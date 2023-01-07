@@ -15,19 +15,9 @@ import HostReview from './entities/entity.hostreview'
 
 dotenv.config()
 
-const DB_HOST = process.env.DB_HOST as string
-const DB_PORT = process.env.DB_PORT as string
-const DB_USERNAME = process.env.DB_USERNAME as string
-const DB_PASSWORD = process.env.DB_PASSWORD as string
-const DB_NAME = process.env.DB_NAME as string
-
 const AppDataSource = new DataSource({
   type: 'postgres',
-  host: DB_HOST,
-  port: parseInt(DB_PORT),
-  username: DB_USERNAME,
-  password: DB_PASSWORD,
-  database: DB_NAME,
+  url: process.env.POSTGRES_URI,
   migrations: [path.join(__dirname, '/migrations/*.ts')],
   entities: [User, Amenity, Listing, Room, Photo, RoomPhoto, ListingPhoto, ListingReview, Booking, HostReview],
   synchronize: false

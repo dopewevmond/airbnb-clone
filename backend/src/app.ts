@@ -7,19 +7,18 @@ import * as Sentry from '@sentry/node'
 import IController from './controllers/controller.interface'
 import ErrorHandler from './middleware/middleware.errorhandler'
 import NotFoundHandler from './middleware/middleware.notfoundhandler'
-
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+import AppDataSource from './datasource'
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+import redisClient from './redisclient'
 dotenv.config()
-
-// making sure all needed environment variables are defined
-const PORT = process.env.PORT ?? 3000
-const SENTRY_DSN = process.env.SENTRY_DSN
 
 class App {
   public app: express.Application
 
   constructor (controllers: IController[]) {
     this.app = express()
-    Sentry.init({ dsn: SENTRY_DSN })
+    Sentry.init({ dsn: process.env.SENTRY_DSN })
     this.app.use(Sentry.Handlers.requestHandler())
     this.setupRequiredMiddleware()
     controllers.forEach((controller) => {
@@ -40,8 +39,8 @@ class App {
   }
 
   public listen (): void {
-    this.app.listen(PORT, () => {
-      console.log(`app is running on port ${PORT}`)
+    this.app.listen(process.env.PORT ?? 3000, () => {
+      console.log(`app is running on port ${process.env.PORT ?? 3000}`)
     })
   }
 }

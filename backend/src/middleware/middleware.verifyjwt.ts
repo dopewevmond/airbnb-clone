@@ -1,11 +1,9 @@
 import { Request, Response, NextFunction } from 'express'
 import * as jwt from 'jsonwebtoken'
-import singletonRedisClient from '../redisclient'
-import * as redis from 'redis'
+import redisClient from '../redisclient'
 import IRedisPrefix from '../types/type.redisprefix'
 
 const SECRET = process.env.SECRET as jwt.Secret
-const redisClient: redis.RedisClientType = singletonRedisClient()
 
 function authenticateJWT (req: Request, res: Response, next: NextFunction): void {
   const authHeader = req.headers.authorization
