@@ -100,7 +100,7 @@ class AuthController implements Controller {
     const { token, newPassword } = req.body
     let user: jwt.JwtPayload
     try {
-      user = jwt.verify(token, process.env.SECRET) as jwt.JwtPayload
+      user = jwt.verify(token, process.env.SECRET as jwt.Secret) as jwt.JwtPayload
       const email = user.email as string
       const tokenId = user.token_id as string
       const redisPrefix: IRedisPrefix = 'resetToken-'
@@ -132,7 +132,7 @@ class AuthController implements Controller {
     const { token } = req.body
     let user: jwt.JwtPayload
     try {
-      user = jwt.verify(token, process.env.REFRESH_SECRET) as jwt.JwtPayload
+      user = jwt.verify(token, process.env.REFRESH_SECRET as jwt.Secret) as jwt.JwtPayload
       const oldRefreshTokenId = user.token_id as string
       const redisPrefix: IRedisPrefix = 'refreshToken-'
       const validRefreshToken = await redisClient.get(redisPrefix + oldRefreshTokenId)

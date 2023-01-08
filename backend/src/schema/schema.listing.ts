@@ -44,7 +44,6 @@ export const ListingSchema = yup.object({
   body: yup.object({
     name: yup.string().required(),
     description: yup.string().required(),
-    isAcceptingBookings: yup.boolean().required(),
     address: yup.string().required(),
     street: yup.string().required(),
     city: yup.string().required(),
@@ -59,6 +58,31 @@ export const ListingSchema = yup.object({
     nightlyRate: yup.string().required(),
     timeCheckIn: yup.string().matches(/^[0-9]{2}:[0-9]{2}$/).required(),
     timeCheckOut: yup.string().matches(/^[0-9]{2}:[0-9]{2}$/).required()
+  }),
+  params: yup.object({
+    id: yup.number()
+  })
+})
+
+export const EditListingSchema = yup.object({
+  body: yup.object({
+    name: yup.string(),
+    description: yup.string(),
+    isAcceptingBookings: yup.boolean(),
+    address: yup.string(),
+    street: yup.string(),
+    city: yup.string(),
+    state: yup.string(),
+    country: yup.string(),
+    region: yup.string().oneOf(regions),
+    listingType: yup.string().oneOf(listings),
+    isFullyPrivate: yup.boolean(),
+    minNightsStay: yup.string(),
+    numBathrooms: yup.string(),
+    maxNumGuests: yup.string(),
+    nightlyRate: yup.string(),
+    timeCheckIn: yup.string().matches(/^[0-9]{2}:[0-9]{2}$/),
+    timeCheckOut: yup.string().matches(/^[0-9]{2}:[0-9]{2}$/)
   }),
   params: yup.object({
     id: yup.number()
