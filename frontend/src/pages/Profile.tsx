@@ -25,10 +25,8 @@ const Profile = () => {
   const error = useAppSelector(selectProfileError);
 
   useEffect(() => {
-    if (status === "idle") {
-      dispatch(fetchProfile(Number(id)));
-    }
-  }, [id]);
+    dispatch(fetchProfile(Number(id)));
+  }, []);
 
   const [show, setShow] = useState(false);
   const toggleModal = () => setShow(!show);

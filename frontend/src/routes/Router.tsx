@@ -10,6 +10,9 @@ import BookingPage from "../pages/Bookings";
 import BookingPaymentPage from "../pages/BookingPayment";
 import BookingDetailModal from "../components/BookingDetailModal";
 import HostGuard from "./HostGuard";
+import HostListings from "../pages/HostListings";
+import CreateBooking from "../pages/CreateBooking";
+import HostListingDetail from "../pages/HostListingDetail";
 
 const Router = () =>
   useRoutes([
@@ -48,10 +51,14 @@ const Router = () =>
               element: <Profile />,
             },
             {
-              path: '/hosting',
+              path: "/hosting/",
               element: <HostGuard />,
-              // children: [{ element }]
-            }
+              children: [
+                { element: <HostListings />, index: true },
+                { element: <CreateBooking />, path: "add-listing" },
+                { element: <HostListingDetail />, path: "listings/:id" },
+              ],
+            },
           ],
         },
       ],

@@ -39,18 +39,20 @@ axiosInstance.interceptors.response.use(
   (response) => {
     return Promise.resolve(response);
   },
-  async (error) => {
+  async (err) => {
+    let error = err;
     console.log(error);
     const { response } = error as AxiosError<{ message?: string }>;
     if (
       response?.data.message === "jwt expired" ||
       response?.data.message === "invalid refresh token"
     ) {
+      error = new Error("You have been logged out");
       localStorage.setItem(loginMessageKey, "You need to log in to continue");
       clearUserData();
       window.location.href = "/login";
     }
-    return Promise.reject(new Error("You have been logged out"));
+    return Promise.reject(error);
   }
 );
 

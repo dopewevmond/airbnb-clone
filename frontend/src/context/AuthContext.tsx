@@ -1,7 +1,7 @@
 import { FC, createContext, useState, ReactNode } from "react";
 import { BASE_URL, redirectParamsKey, redirectToKey } from "../utils/constants";
 import jwtDecode from "jwt-decode";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { clearUserData, getUserData, setUserData } from "../utils/authHelper";
 import axiosInstance from "../utils/axiosInstance";
@@ -57,7 +57,6 @@ const AuthContextProvider: FC<Props> = ({ children }) => {
   const [email, setEmail] = useState<string | null>(initialAuthContext.email);
   const [role, setRole] = useState<string | null>(initialAuthContext.role);
   const [isLoggedIn, setLoggedIn] = useState(initialAuthContext.isLoggedIn);
-  const location = useLocation();
 
   const login = async (email: string, password: string): Promise<void> => {
     setEmail(null);
@@ -75,13 +74,17 @@ const AuthContextProvider: FC<Props> = ({ children }) => {
     setLoggedIn(true);
     setUserData(data.accessToken, data.refreshToken); // storing auth data in localStorage
     let redirectPath = "/";
-    const redirect_to = localStorage.getItem(redirectToKey);
-    const params = localStorage.getItem(redirectParamsKey);
-    if (redirect_to != null) {
-      redirectPath = redirect_to;
-    }
-    if (params != null) {
-      redirectPath += params;
+    if (jwtInfo.role === "visitor") {
+      const redirect_to = localStorage.getItem(redirectToKey);
+      const params = localStorage.getItem(redirectParamsKey);
+      if (redirect_to != null) {
+        redirectPath = redirect_to;
+      }
+      if (params != null) {
+        redirectPath += params;
+      }
+    } else {
+      redirectPath = "/hosting";
     }
     navigate(redirectPath);
   };

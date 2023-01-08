@@ -37,7 +37,10 @@ export const NavBar = () => {
   return (
     <Navbar bg="light" expand="lg" style={{ height: navBarHeight }}>
       <Container className="position-relative">
-        <Link to="/" className="navbar-brand d-none d-md-block">
+        <Link
+          to={`${role === "host" ? "/hosting" : "/"}`}
+          className="navbar-brand d-none d-md-block"
+        >
           <Logo />
         </Link>
 
@@ -108,12 +111,14 @@ export const NavBar = () => {
                 </ListGroup.Item>
                 {role === "host" ? (
                   <>
-                    <ListGroup.Item
-                      className="gray-bg-on-hover"
-                      role="button"
-                      disabled
-                    >
-                      Listings
+                    <ListGroup.Item className="gray-bg-on-hover">
+                      <Link
+                        onClick={toggleDropdown}
+                        to="/hosting"
+                        className="d-block w-100 text-decoration-none text-reset"
+                      >
+                        Listings
+                      </Link>
                     </ListGroup.Item>
                     <ListGroup.Item
                       className="gray-bg-on-hover"

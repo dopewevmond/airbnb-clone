@@ -30,7 +30,7 @@ const Listing = () => {
                 imageSource={
                   listing.photos && listing.photos.length > 0
                     ? listing.photos[0].photo.photo_uri
-                    : "/images/house.png"
+                    : "/images/house.jpg"
                 }
               />
             </Link>

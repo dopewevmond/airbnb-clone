@@ -65,9 +65,15 @@ export interface IListingDetail extends IListing {
   max_num_guests: number;
   time_check_in: string;
   time_check_out: string;
+  address: string
+  street: string
+  state: string
+  region: string;
+  fully_private_listing: boolean;
   owner: IUser;
   rooms: IRoom[];
-  amenities: IAmenities;
+  amenities: IAmenities | null;
+  is_accepting_bookings: boolean;
 }
 
 export interface IReview {
@@ -88,3 +94,17 @@ export interface IBooking {
   visited_listing: boolean
   listing: IListingDetail
 }
+
+export const regions = ['asia', 'africa', 'north america', 'south america', 'europe', 'australia']
+export const listings = [
+  'house',
+  'flat/apartment',
+  'tent',
+  'farm',
+  'guest house',
+  'hotel',
+  'boat',
+  'bed and breakfast',
+  'container',
+  'dome'
+]
