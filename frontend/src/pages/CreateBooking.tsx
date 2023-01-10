@@ -1,5 +1,8 @@
 import { FullPageLoader } from "../components/FullPageLoader";
-import { ListingDetailFormValues, ListingDetailForm } from "../components/ListingDetailForm";
+import {
+  ListingDetailFormValues,
+  ListingDetailForm,
+} from "../components/ListingDetailForm";
 import { useAppDispatch, useAppSelector } from "../redux/store";
 import {
   selectHostListingsStatus,

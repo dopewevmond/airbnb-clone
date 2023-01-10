@@ -50,15 +50,21 @@ const Router = () =>
               path: "profile",
               element: <Profile />,
             },
-            {
-              path: "/hosting/",
-              element: <HostGuard />,
-              children: [
-                { element: <HostListings />, index: true },
-                { element: <CreateBooking />, path: "add-listing" },
-                { element: <HostListingDetail />, path: "listings/:id" },
-              ],
-            },
+          ],
+        },
+      ],
+    },
+    {
+      path: "/hosting/",
+      element: <HostGuard />,
+      children: [
+        {
+          element: <HomeLayout />,
+          path: "/hosting/",
+          children: [
+            { element: <HostListings />, index: true },
+            { element: <CreateBooking />, path: "add-listing" },
+            { element: <HostListingDetail />, path: "listings/:id" },
           ],
         },
       ],

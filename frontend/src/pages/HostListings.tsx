@@ -11,7 +11,17 @@ const HostListings = () => {
   if (error != null) return <div className="container"> {error} </div>;
   if (listings == null || listings.length === 0)
     return (
-      <div className="container"> There are no listings at this time </div>
+      <div className="container">
+        <p>There are no listings at this time</p>
+        <button
+          className="btn btn-danger btn-sm mb-4"
+          onClick={() => {
+            navigate("/hosting/add-listing");
+          }}
+        >
+          Add Listing
+        </button>
+      </div>
     );
   return (
     <div className="container my-4">

@@ -26,7 +26,7 @@ const ListingDetail = () => {
     return <div className="container"> Listing not found </div>;
   return (
     <div className="container my-4">
-      <h1 className="display-4">
+      <h1 className="display-5">
         <strong> {listing.name} </strong>
       </h1>
       <hr />

@@ -28,14 +28,14 @@ const hostListingSlice = createSlice({
       state.status = 'loaded'
     })
     .addCase(fetchHostListings.rejected, (state, action) => {
-      state.error = action.error.message ?? 'An error occurred whlie fetching your posted listings'
+      state.error = action.error.message ?? 'An error occurred while fetching your posted listings'
       state.status = 'failed'
     })
     .addCase(addNewListing.fulfilled, (state) => {
       state.status = 'idle'
     })
     .addCase(addNewListing.rejected, (state) => {
-      state.error = 'An error occurred whlie fetching your posted listings'
+      state.error = 'An error occurred while adding your listing'
       state.status = 'failed'
     })
     .addCase(fetchHostListingDetails.fulfilled, (state, action) => {

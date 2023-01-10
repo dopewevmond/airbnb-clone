@@ -1,9 +1,9 @@
 import { Formik, Form, Field } from "formik";
-import { Spinner } from "react-bootstrap";
 import * as yup from "yup";
 import { IListing, regions, listings } from "../interfaces";
 
-export interface ListingDetailFormValues extends Omit<IListing, "id" | "photos" | "night_rate"> {
+export interface ListingDetailFormValues
+  extends Omit<IListing, "id" | "photos" | "night_rate"> {
   name: string;
   description: string;
   address: string;
@@ -24,7 +24,7 @@ export interface ListingDetailFormValues extends Omit<IListing, "id" | "photos" 
 interface Props {
   initialValues: ListingDetailFormValues;
   handleSubmit: (values: any) => void;
-  submitButtonValue: string
+  submitButtonValue: string;
 }
 
 const valMsg = (field: string) =>
@@ -34,7 +34,7 @@ const typeValMsg = (field: string) =>
 
 const formValidationSchema = yup.object().shape({
   name: yup.string().required(valMsg("name of listing")),
-  description: yup.string().required(valMsg("description")),
+  description: yup.string().max(500, 'Cannot be longer than 500 characters').required(valMsg("description")),
   address: yup.string().required(valMsg("address")),
   street: yup.string().required(valMsg("street")),
   city: yup.string().required(valMsg("city")),
@@ -60,7 +60,11 @@ const formValidationSchema = yup.object().shape({
     .required(valMsg("nightly rate")),
 });
 
-export const ListingDetailForm = ({ initialValues, handleSubmit, submitButtonValue }: Props) => {
+export const ListingDetailForm = ({
+  initialValues,
+  handleSubmit,
+  submitButtonValue,
+}: Props) => {
   return (
     <Formik
       initialValues={initialValues}
@@ -280,7 +284,7 @@ export const ListingDetailForm = ({ initialValues, handleSubmit, submitButtonVal
           </div>
 
           <div className="row pb-4 w-100 m-0">
-            <div className="col-4 p-0">
+            <div className="col-6 p-0">
               <div className="input-group">
                 <label htmlFor="numBathrooms" className="form-label">
                   No. of bathrooms
@@ -302,13 +306,13 @@ export const ListingDetailForm = ({ initialValues, handleSubmit, submitButtonVal
                 )}
               </div>
             </div>
-            <div className="col-4 p-0">
+            <div className="col-6 p-0">
               <div className="input-group">
                 <label htmlFor="maxNumGuests" className="form-label">
-                  Max. num. of guests
+                  Maximum guests
                 </label>
                 <Field
-                  className={`form-control rounded-0 w-100 ${
+                  className={`form-control rounded-0 rounded-end w-100 ${
                     touched.maxNumGuests && errors.maxNumGuests
                       ? "border-danger"
                       : ""
@@ -324,13 +328,13 @@ export const ListingDetailForm = ({ initialValues, handleSubmit, submitButtonVal
                 )}
               </div>
             </div>
-            <div className="col-4 p-0">
+            <div className="col-6 p-0">
               <div className="input-group">
                 <label htmlFor="nightlyRate" className="form-label">
                   Rate (in $) per night
                 </label>
                 <Field
-                  className={`form-control rounded-0 rounded-end w-100 ${
+                  className={`form-control rounded-0 rounded-start w-100 ${
                     touched.nightlyRate && errors.nightlyRate
                       ? "border-danger"
                       : ""
@@ -346,17 +350,34 @@ export const ListingDetailForm = ({ initialValues, handleSubmit, submitButtonVal
                 )}
               </div>
             </div>
+            <div className="col-6 p-0">
+              <div className="input-group">
+                <label htmlFor="minNightsStay" className="form-label">
+                  Minimum nights of stay
+                </label>
+                <Field
+                  className={`form-control rounded-0 rounded-end w-100 ${
+                    touched.minNightsStay && errors.minNightsStay
+                      ? "border-danger"
+                      : ""
+                  }`}
+                  type="text"
+                  placeholder="Minimum nights stay"
+                  name="minNightsStay"
+                  id="minNightsStay"
+                  autoComplete="false"
+                />
+                {touched.minNightsStay && errors.minNightsStay && (
+                  <div className="small text-danger">{errors.minNightsStay}</div>
+                )}
+              </div>
+            </div>
           </div>
           <button
             className="btn btn-danger btn-block w-100 d-flex align-items-center justify-content-center"
             type="submit"
-            disabled={isSubmitting}
           >
-            {isSubmitting ? (
-              <Spinner className="d-inline-block mx-auto" />
-            ) : (
-              <>{submitButtonValue}</>
-            )}
+            {submitButtonValue}
           </button>
         </Form>
       )}
