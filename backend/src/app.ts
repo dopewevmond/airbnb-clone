@@ -21,10 +21,10 @@ class App {
     Sentry.init({ dsn: process.env.SENTRY_DSN })
     this.app.use(Sentry.Handlers.requestHandler())
     this.setupRequiredMiddleware()
+    this.app.get('/', (req: express.Request, res: express.Response) => {
+      res.send('Health check. App is working')
+    })
     controllers.forEach((controller) => {
-      this.app.get('/', (req: express.Request, res: express.Response) => {
-        res.send('Health check. App is working')
-      })
       this.app.use('/', controller.router)
     })
     this.app.use(Sentry.Handlers.errorHandler())
